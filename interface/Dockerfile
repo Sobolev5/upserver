@@ -29,5 +29,4 @@ COPY ./ /app
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
-
 CMD ["gunicorn", "--bind", "0.0.0.0:12345", "--threads", "2", "--workers", "5", "wsgi"]

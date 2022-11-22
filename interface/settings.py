@@ -1,20 +1,28 @@
 import os
 from pathlib import Path
 
+# from dotenv import load_dotenv
+# load_dotenv()
 
+# ENV
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "1"
-
-
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 
+try:
+    LOG_SIZE = int(os.getenv("LOG_SIZE"))
+except:
+    LOG_SIZE = 10000
 
+# INTEGRATIONS
+SIMPLE_PRINT = os.getenv("SIMPLE_PRINT")
+
+# COMMON
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ["https://*.uhstage.ru"]
 BASE_DIR = Path(__file__).resolve().parent
 ROOT_URLCONF = 'urls'
 WSGI_APPLICATION = 'wsgi.application'
@@ -25,6 +33,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 
 INSTALLED_APPS = [

@@ -1,6 +1,6 @@
 import os
 from django.contrib.auth.models import User
-from simple_print import sprint
+from integrations import sprint
 from monitoring.models import Monitor
 
 
