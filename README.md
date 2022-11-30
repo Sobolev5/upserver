@@ -64,6 +64,13 @@ Watch monitoring script console:
 docker logs upserver-source --tail 100 --follow
 ```
 
+Watch dependencies script console:
+```sh
+docker logs upserver-postgres --tail 100 --follow
+docker logs upserver-clickhouse --tail 100 --follow
+docker logs upserver-rabbitmq --tail 100 --follow
+```
+
 Start `upserver`:
 ```sh
 docker-compose up --build -d
@@ -84,7 +91,15 @@ Restore from backup:
 cat upserver.sql | docker exec -i upserver-postgres psql -U upserver_db_user -d upserver_db
 ```
 
+# Integrations
+Upserver integrated with `simple-print` and `django-clickhouse-logger` from the box:
+https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)
+https://github.com/Sobolev5/django-clickhouse-logger (catch logs from Clickhouse)  
+  
+If you want to add your own integration, you can easy make a fork.
+
+
 # TODO 
-> api
-> server down alerting
-> tests
+> api  
+> server down alerting  
+> tests  

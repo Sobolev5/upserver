@@ -1,19 +1,19 @@
 import os
 from django.contrib.auth.models import User
-from integrations import sprint
+from simple_print import sprint
 from monitoring.models import Monitor
 
 
-def clear_database() -> None:
-    # python run.py fill_database "clear_database()"
+def clear() -> None:
+    # python run.py initial_data "clear_database()"
     User.objects.all().delete()
     UserProfile.objects.all().delete()
     Monitor.objects.all().delete()
-    sprint("clear_database -> complete", c="green")
+    sprint("Clear_database -> complete", c="green")
 
 
-def fill_database() -> None:
-    # python run.py fill_database "fill_database()"
+def prepare() -> None:
+    # python run.py initial_data "prepare()"
     username = os.getenv("ADMIN_USER")
     password = os.getenv("ADMIN_PASSWORD")
     superuser = User.objects.create_superuser(username=username, email=f"{username}@upserver.dot", password=password)
@@ -50,4 +50,4 @@ def fill_database() -> None:
         monitor.save()
         sprint(f"monitor successfully created ID={monitor.id}")
 
-    sprint("fill_database -> complete", c="green")
+    sprint("Fill_database -> complete", c="green")

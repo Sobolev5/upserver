@@ -1,6 +1,7 @@
 asgiref==3.5.2
 asttokens==2.0.5
 Django==4.1.1
+django-clickhouse-logger==0.3
 executing==0.8.1
 gunicorn==20.1.0
 psycopg2-binary==2.9.3
