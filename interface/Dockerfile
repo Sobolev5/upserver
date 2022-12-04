@@ -31,9 +31,7 @@ RUN crontab /etc/cron.d/crontab
 WORKDIR /app/
 COPY ./ /app
 
-
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
-
-ENTRYPOINT ["/bin/bash", "/app/start.sh"]
+ENTRYPOINT gunicorn --bind 0.0.0.0:12345 --threads 2 --workers 5 --reload wsgi

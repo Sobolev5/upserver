@@ -44,8 +44,10 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: vhost
     ports:
-      - '55672:15672'
+      - '55672:5672'
+      - '51567:15672'
     expose:
       - "5672"    
     volumes:
@@ -54,54 +56,56 @@ services:
     networks:
       - upserver
 
-  # upserver-interface:
-  #   container_name: upserver-interface
-  #   build: 
-  #     context: ./interface/
-  #     dockerfile: Dockerfile 
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #     POSTGRES_HOST: ${POSTGRES_HOST}
-  #     POSTGRES_PORT: ${POSTGRES_PORT}
-  #     DEBUG: ${DEBUG}
-  #     SECRET_KEY: ${SECRET_KEY} 
-  #     ADMIN_USER: ${ADMIN_USER}
-  #     ADMIN_PASSWORD: ${ADMIN_PASSWORD} 
-  #     CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
-  #     CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
-  #     CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-  #     CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}  
-  #     RABBITMQ_HOST: ${RABBITMQ_HOST}
-  #     RABBITMQ_PORT: ${RABBITMQ_PORT}
-  #     RABBITMQ_USER: ${RABBITMQ_USER}
-  #     RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}        
-  #   restart: unless-stopped 
-  #   depends_on: 
-  #     - upserver-postgres    
-  #   ports:
-  #     - 12345:12345
-  #   networks:
-  #     - upserver  
+  upserver-interface:
+    container_name: upserver-interface
+    build: 
+      context: ./interface/
+      dockerfile: Dockerfile 
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DEBUG: ${DEBUG}
+      SECRET_KEY: ${SECRET_KEY} 
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD} 
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}  
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}        
+    restart: unless-stopped 
+    depends_on: 
+      - upserver-postgres 
+      - upserver-clickhouse  
+      - upserver-rabbitmq 
+    ports:
+      - 12345:12345
+    networks:
+      - upserver  
 
-  # upserver-source:
-  #   container_name: upserver-source
-  #   build: 
-  #     context: ./source/
-  #     dockerfile: Dockerfile  
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #     POSTGRES_HOST: ${POSTGRES_HOST}
-  #     POSTGRES_PORT: ${POSTGRES_PORT}
-  #     DEBUG: ${DEBUG}  
-  #   restart: unless-stopped 
-  #   depends_on: 
-  #     - upserver-postgres
-  #   networks:
-  #     - upserver  
+  upserver-source:
+    container_name: upserver-source
+    build: 
+      context: ./source/
+      dockerfile: Dockerfile  
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DEBUG: ${DEBUG}  
+    restart: unless-stopped 
+    depends_on: 
+      - upserver-postgres
+    networks:
+      - upserver  
 
 networks:
   upserver:

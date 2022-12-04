@@ -3,55 +3,95 @@ from clickhouse_driver.dbapi.extras import DictCursor
 from integrations.models import ClickHouseLogger
 from integrations.models import ClickHouseCaptureException
 from integrations.models import SimplePrintCatch
+from simple_print import catch 
+from settings import CLICKHOUSE_HOST
+from settings import CLICKHOUSE_PORT
+from settings import CLICKHOUSE_USER
+from settings import CLICKHOUSE_PASSWORD
+from settings import SIMPLE_PRINT_AMQP_URI
 
 
-def fill_clickhouse_logger():
+def get_clickhouse_logger_records():
+    # python run.py integrations.tasks "get_clickhouse_logger_records()"
+    # docker run -it python run.py integrations.tasks "get_clickhouse_logger_records()"
+
     query = f"""
         SELECT (*) FROM django_clickhouse_logger.logger
     """
+
     data = []   
-    with connect.cursor(cursor_factory=DictCursor) as cursor:
+    clickhouse_connect = connect(host=CLICKHOUSE_HOST, port=CLICKHOUSE_PORT, user=CLICKHOUSE_USER, password=CLICKHOUSE_PASSWORD)
+
+    with clickhouse_connect.cursor(cursor_factory=DictCursor) as cursor:
         cursor.execute(query)
         data = cursor.fetchall()
 
-    exc_hashes = ClickHouseLogger.object.values_list("exc_hash", flat=True)
     for row in data:
-        if row["exc_hash"] in exc_hashes:
-            continue
-        record = ClickHouseLogger()
+        record, created = ClickHouseLogger.objects.get_or_create(exc_hash=row["exc_hash"])
         for field in ClickHouseLogger._meta.fields:
-            if field in row and row["field"]:
-                setattr(record, field) 
-        try:
-            record.save()          
-        except:
-            continue
+            field_name = field.name
+            if field_name in row and row[field_name]:         
+                setattr(record, field_name, row[field_name]) 
+        if created:
+            record.save()
+        else:
+            record.errors_count += 1
+            record.save()    
+
+    query = f"""
+        TRUNCATE TABLE IF EXISTS django_clickhouse_logger.logger
+    """
+
+    with clickhouse_connect.cursor(cursor_factory=DictCursor) as cursor:
+        cursor.execute(query)
 
 
 
-def fill_clickhouse_capture_exception():
+def get_clickhouse_captured_exceptions():
+    # python run.py integrations.tasks "get_clickhouse_captured_exceptions()"
+    # docker run -it python run.py integrations.tasks "get_clickhouse_captured_exceptions()"
+
     query = f"""
         SELECT (*) FROM django_clickhouse_logger.capture_exception
     """
+
     data = []   
-    with connect.cursor(cursor_factory=DictCursor) as cursor:
+    clickhouse_connect = connect(host=CLICKHOUSE_HOST, port=CLICKHOUSE_PORT, user=CLICKHOUSE_USER, password=CLICKHOUSE_PASSWORD)
+    with clickhouse_connect.cursor(cursor_factory=DictCursor) as cursor:
         cursor.execute(query)
         data = cursor.fetchall()
 
-    exc_hashes = ClickHouseCaptureException.object.values_list("exc_hash", flat=True)
     for row in data:
-        if row["exc_hash"] in exc_hashes:
-            continue        
-        record = ClickHouseCaptureException()
+        record, created = ClickHouseCaptureException.objects.get_or_create(exc_hash=row["exc_hash"])
         for field in ClickHouseCaptureException._meta.fields:
-            if field in row and row["field"]:
-                setattr(record, field) 
-        try:
-            record.save()          
-        except:
-            continue
+            field_name = field.name
+            if field_name in row and row[field_name]:         
+                setattr(record, field_name, row[field_name]) 
+        if created:
+            record.save()
+        else:
+            record.errors_count += 1
+            record.save()    
+
+    query = f"""
+        TRUNCATE TABLE IF EXISTS django_clickhouse_logger.capture_exception
+    """
+
+    with clickhouse_connect.cursor(cursor_factory=DictCursor) as cursor:
+        cursor.execute(query)
 
 
-def simple_print_catch():
-    # TODO make catch
+def catch_simple_print_messages():
+    # python run.py integrations.tasks "catch_simple_print_messages()"
+    # docker run -it python run.py integrations.tasks "catch_simple_print_messages()"
+
+    for message in catch(count=100, uri=SIMPLE_PRINT_AMQP_URI):
+        catched = SimplePrintCatch()
+        catched.message = message["msg"]
+        catched.tag = message["tag"]
+        catched.uuid = message["uuid"]
+        catched.filename = message["filename"]
+        catched.function_name = message["function_name"]
+        catched.lineno = message["lineno"]
+        catched.save()    
 
