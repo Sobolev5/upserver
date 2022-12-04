@@ -86,15 +86,16 @@ def get_clickhouse_captured_exceptions():
 def catch_simple_print_messages():
     # python run.py integrations.tasks "catch_simple_print_messages()"
     # docker run -it python run.py integrations.tasks "catch_simple_print_messages()"
-
-    for message in catch(count=100, uri=SIMPLE_PRINT_AMQP_URI):
-        catched = SimplePrintCatch()
-        catched.message = message["msg"]
-        catched.tag = message["tag"]
-        catched.uuid = message["uuid"]
-        catched.filename = message["filename"]
-        catched.function_name = message["function_name"]
-        catched.lineno = message["lineno"]
-        catched.save() 
-        print(f"record saved id={catched.id}")    
+    messages = catch(count=100, uri=SIMPLE_PRINT_AMQP_URI)
+    for message in messages:
+        if message:
+            catched = SimplePrintCatch()
+            catched.message = message["msg"]
+            catched.tag = message["tag"]
+            catched.uuid = message["uuid"]
+            catched.filename = message["filename"]
+            catched.function_name = message["function_name"]
+            catched.lineno = message["lineno"]
+            catched.save() 
+            print(f"record saved id={catched.id}")    
 
