@@ -106,8 +106,8 @@ docker exec -it upserver-interface python /app/run.py integrations.tasks "catch_
 You can add this commands to cron (run every minute):
 ```sh
 echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_logger_records()" &>/dev/null' >> /var/spool/cron/root 
-echo '* * * * * docker exec -it upserver-interface python /app/run.py "get_clickhouse_captured_exceptions()" &>/dev/null' >> /var/spool/cron/root 
-echo '* * * * * docker exec -it upserver-interface python /app/run.py "catch_simple_print_messages()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_captured_exceptions()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "catch_simple_print_messages()" &>/dev/null' >> /var/spool/cron/root 
 ```
 
 If you want to add your own integration, you can easy make a fork.

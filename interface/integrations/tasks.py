@@ -36,7 +36,8 @@ def get_clickhouse_logger_records():
             record.save()
         else:
             record.errors_count += 1
-            record.save()    
+            record.save()   
+            print(f"record saved id={record.id}")    
 
     query = f"""
         TRUNCATE TABLE IF EXISTS django_clickhouse_logger.logger
@@ -71,7 +72,8 @@ def get_clickhouse_captured_exceptions():
             record.save()
         else:
             record.errors_count += 1
-            record.save()    
+            record.save() 
+            print(f"record saved id={record.id}")   
 
     query = f"""
         TRUNCATE TABLE IF EXISTS django_clickhouse_logger.capture_exception
@@ -93,5 +95,6 @@ def catch_simple_print_messages():
         catched.filename = message["filename"]
         catched.function_name = message["function_name"]
         catched.lineno = message["lineno"]
-        catched.save()    
+        catched.save() 
+        print(f"record saved id={catched.id}")    
 
