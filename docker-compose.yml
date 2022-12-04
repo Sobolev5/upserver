@@ -11,14 +11,50 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       PGDATA: /data/pgdata
     volumes:
-      - upserver-db:/data/pgdata
+      - upserver-postgres:/data/pgdata
+    ports:
+      - "55432:5432"
     expose:
       - "5432"
-    networks:
-      - postgres
     restart: unless-stopped
     networks:
       - upserver  
+
+  upserver-clickhouse:
+    container_name: upserver-clickhouse
+    image: yandex/clickhouse-server
+    ports:
+      - "58123:8123"
+      - "59000:9000"
+    expose:
+      - "8123"  
+      - "9000"       
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    volumes:
+      - upserver-clickhouse:/var/lib/clickhouse
+    restart: unless-stopped      
+    networks:
+      - upserver
+
+  upserver-rabbitmq:
+    container_name: upserver-rabbitmq
+    image: 'rabbitmq:3.11.4-management'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: vhost
+    ports:
+      - '55672:5672'
+      - '51567:15672'
+    expose:
+      - "5672"    
+    volumes:
+      - upserver-rabbitmq:/var/lib/rabbitmq/mnesia/
+    restart: unless-stopped
+    networks:
+      - upserver
 
   upserver-interface:
     container_name: upserver-interface
@@ -35,9 +71,19 @@ services:
       SECRET_KEY: ${SECRET_KEY} 
       ADMIN_USER: ${ADMIN_USER}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD} 
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}  
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}        
     restart: unless-stopped 
     depends_on: 
-      - upserver-postgres    
+      - upserver-postgres 
+      - upserver-clickhouse  
+      - upserver-rabbitmq 
     ports:
       - 12345:12345
     networks:
@@ -66,4 +112,7 @@ networks:
     driver: bridge
   
 volumes:
-  upserver-db:
+  upserver-postgres:
+  upserver-clickhouse:
+  upserver-rabbitmq:
+  

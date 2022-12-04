@@ -24,9 +24,14 @@ RUN apt-get update && \
     apt-utils libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev libjpeg-dev libfreetype6-dev python-dev libpq-dev python-dev libxml2-dev libxslt-dev postgresql-client git && \
     pip3 install -U pip setuptools 
 
+RUN apt-get -y install cron
+COPY ./crontab /etc/cron.d/crontab
+RUN crontab /etc/cron.d/crontab
+
 WORKDIR /app/
 COPY ./ /app
 
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
-CMD ["gunicorn", "--bind", "0.0.0.0:12345", "--threads", "2", "--workers", "5", "wsgi"]
+
+ENTRYPOINT gunicorn --bind 0.0.0.0:12345 --threads 2 --workers 5 --reload wsgi

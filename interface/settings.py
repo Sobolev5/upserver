@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
 
-# from dotenv import load_dotenv
-# load_dotenv()
+
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # ENV
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -12,14 +14,11 @@ POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-
 try:
     LOG_SIZE = int(os.getenv("LOG_SIZE"))
 except:
     LOG_SIZE = 10000
 
-# INTEGRATIONS
-SIMPLE_PRINT = os.getenv("SIMPLE_PRINT")
 
 # COMMON
 ALLOWED_HOSTS = ['*']
@@ -35,7 +34,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'integrations',
     'monitoring'
 ]
 
@@ -104,3 +103,27 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# INTEGRATIONS:
+
+
+# DJANGO CLICKHOUSE LOGGER https://github.com/Sobolev5/django-clickhouse-logger
+CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST")
+CLICKHOUSE_PORT = os.getenv("CLICKHOUSE_PORT")
+CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER")
+CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD") 
+if CLICKHOUSE_HOST:
+    DJANGO_CLICKHOUSE_LOGGER_HOST = CLICKHOUSE_HOST
+    DJANGO_CLICKHOUSE_LOGGER_PORT = CLICKHOUSE_PORT
+    DJANGO_CLICKHOUSE_LOGGER_USER = CLICKHOUSE_USER
+    DJANGO_CLICKHOUSE_LOGGER_PASSWORD = CLICKHOUSE_PASSWORD
+    DJANGO_CLICKHOUSE_LOGGER_TTL_DAY = 3
+
+
+# SIMPLE PRINT https://github.com/Sobolev5/simple-print]
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
+RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
+RABBITMQ_USER = os.getenv("RABBITMQ_USER")
+RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD")
+AMQP_URI = f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/vhost"
+if RABBITMQ_HOST:
+    SIMPLE_PRINT_AMQP_URI = AMQP_URI

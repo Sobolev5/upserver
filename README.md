@@ -64,6 +64,13 @@ Watch monitoring script console:
 docker logs upserver-source --tail 100 --follow
 ```
 
+Watch dependencies script console:
+```sh
+docker logs upserver-postgres --tail 100 --follow
+docker logs upserver-clickhouse --tail 100 --follow
+docker logs upserver-rabbitmq --tail 100 --follow
+```
+
 Start `upserver`:
 ```sh
 docker-compose up --build -d
@@ -84,7 +91,35 @@ Restore from backup:
 cat upserver.sql | docker exec -i upserver-postgres psql -U upserver_db_user -d upserver_db
 ```
 
+# Integrations
+Upserver integrated with `simple-print` and `django-clickhouse-logger` from the box:
+https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)
+https://github.com/Sobolev5/django-clickhouse-logger (catch logs from Clickhouse)  
+
+Userful integrations commands:
+```sh
+docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_logger_records()" # pull records for logger (django-clickhouse-logger)
+docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_captured_exceptions()" # pull records for capture_exception (django-clickhouse-logger)
+docker exec -it upserver-interface python /app/run.py integrations.tasks "catch_simple_print_messages()" # catch simple print messages (simple-print)
+```
+
+You can add this commands to cron (run every minute):
+```sh
+echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_logger_records()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -it upserver-interface python /app/run.py "get_clickhouse_captured_exceptions()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -it upserver-interface python /app/run.py "catch_simple_print_messages()" &>/dev/null' >> /var/spool/cron/root 
+```
+
+If you want to add your own integration, you can easy make a fork.
+
+
+
+
 # TODO 
-> api
-> server down alerting
-> tests
+> api  
+> server down alerts
+> tests  
+
+
+# Time tracker for developers
+Use [Workhours.space](https://workhours.space/) for your working time tracking. It is free.
