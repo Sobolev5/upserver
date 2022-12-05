@@ -106,8 +106,9 @@ cat upserver.sql | docker exec -i upserver-postgres psql -U upserver_db_user -d 
 
 # Integrations
 Upserver integrated with `simple-print` and `django-clickhouse-logger` from the box:
-https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)  
-https://github.com/Sobolev5/django-clickhouse-logger (catch logs from Clickhouse)  
+https://github.com/Sobolev5/django-clickhouse-logger (catch logs from Clickhouse)   
+https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)   
+
   
 Example ENV for Django (**settings.py**): 
 ```
@@ -133,9 +134,9 @@ docker exec -it upserver-interface python /app/run.py integrations.tasks "catch_
 
 You can add this commands to cron (run every minute):
 ```sh
-echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_logger_records()" &>/dev/null' >> /var/spool/cron/root 
-echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "get_clickhouse_captured_exceptions()" &>/dev/null' >> /var/spool/cron/root 
-echo '* * * * * docker exec -it upserver-interface python /app/run.py integrations.tasks "catch_simple_print_messages()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -i upserver-interface python /app/run.py integrations.tasks "get_clickhouse_logger_records()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -i upserver-interface python /app/run.py integrations.tasks "get_clickhouse_captured_exceptions()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -i upserver-interface python /app/run.py integrations.tasks "catch_simple_print_messages()" &>/dev/null' >> /var/spool/cron/root 
 ```
 
 If you want to add your own integration, you can easy make a fork.
@@ -145,7 +146,7 @@ If you want to add your own integration, you can easy make a fork.
 
 # TODO 
 > api  
-> server down alerts
+> server down alerts  
 > tests  
 
 
