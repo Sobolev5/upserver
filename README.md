@@ -14,15 +14,16 @@ Example of use:
 Clone repository first:   
 ```sh
 git clone https://github.com/Sobolev5/upserver
+mv .env.example .env
 ```
 
-Rename .env.example to .env and change ENV variables:
+Change variables in *.env* file:
 ```sh
-# ADMIN USER [CHANGE ALL]
+# ADMIN USER [CHANGE PASSWORD]
 ADMIN_USER=admin
 ADMIN_PASSWORD=password
 
-# DATABASE [CHANGE IF NECESSARY, NOT REQUIRED]
+# COMMON DB [CHANGE PASSWORD]
 POSTGRES_DB=upserver_db
 POSTGRES_USER=upserver_db_user
 POSTGRES_PASSWORD=upserver_db_password
@@ -32,6 +33,18 @@ POSTGRES_PORT=5432
 # INTERFACE [CHANGE SECRET KEY]
 SECRET_KEY=django-insecure-@x5%xegdelq=s!fybiup=pktful_+!t%x42y1!hh_=-p7$kz9s 
 DEBUG=0
+
+# LOGGER DB [CHANGE PASSWORD]
+CLICKHOUSE_HOST=upserver-clickhouse
+CLICKHOUSE_PORT=9000
+CLICKHOUSE_USER=default
+CLICKHOUSE_PASSWORD=default
+
+# BROKER [CHANGE PASSWORD] 
+RABBITMQ_HOST=upserver-rabbitmq
+RABBITMQ_PORT=5672
+RABBITMQ_USER=admin 
+RABBITMQ_PASSWORD=admin
 ```
 
 Start `upserver`:
@@ -95,6 +108,21 @@ cat upserver.sql | docker exec -i upserver-postgres psql -U upserver_db_user -d 
 Upserver integrated with `simple-print` and `django-clickhouse-logger` from the box:
 https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)
 https://github.com/Sobolev5/django-clickhouse-logger (catch logs from Clickhouse)  
+  
+Example ENV for Django (**settings.py**): 
+```
+# first - install:
+# pip install simple-print
+# pip install django-clickhouse-logger 
+# second - put ENV variables in settings:
+DJANGO_CLICKHOUSE_LOGGER_HOST = "YOU_SERVER_IP"
+DJANGO_CLICKHOUSE_LOGGER_PORT = 59000
+DJANGO_CLICKHOUSE_LOGGER_USER = "default"
+DJANGO_CLICKHOUSE_LOGGER_PASSWORD = "default"
+DJANGO_CLICKHOUSE_LOGGER_TTL_DAY = 3
+DJANGO_CLICKHOUSE_LOGGER_REQUEST_EXTRA = "session"
+SIMPLE_PRINT_AMQP_URI = "amqp://admin:admin@YOU_SERVER_IP:55672/vhost"
+```
 
 Userful integrations commands:
 ```sh

@@ -22,7 +22,7 @@ class ClickHouseLogger(models.Model):
     exc_hash = models.CharField(max_length=255, unique=True)
     user = models.CharField(max_length=255, null=True, blank=True)
     user_id = models.PositiveIntegerField(default=22)
-    request_extra = models.CharField(max_length=255, null=True, blank=True)
+    request_extra = models.TextField(null=True, blank=True)
     site = models.CharField(max_length=255, null=True, blank=True)   
     scheme = models.CharField(max_length=255, null=True, blank=True)  
     body = models.CharField(max_length=255, null=True, blank=True)  
