@@ -117,12 +117,24 @@ Example ENV for Django (**settings.py**):
 # pip install django-clickhouse-logger 
 # second - put ENV variables in settings:
 DJANGO_CLICKHOUSE_LOGGER_HOST = "YOU_SERVER_IP"
-DJANGO_CLICKHOUSE_LOGGER_PORT = 59000
+DJANGO_CLICKHOUSE_LOGGER_PORT = 59000 # NOTE 59000 is Clickhouse port for Upserver
 DJANGO_CLICKHOUSE_LOGGER_USER = "default"
 DJANGO_CLICKHOUSE_LOGGER_PASSWORD = "default"
 DJANGO_CLICKHOUSE_LOGGER_TTL_DAY = 3
 DJANGO_CLICKHOUSE_LOGGER_REQUEST_EXTRA = "session"
-SIMPLE_PRINT_AMQP_URI = "amqp://admin:admin@YOU_SERVER_IP:55672/vhost"
+SIMPLE_PRINT_AMQP_URI = "amqp://admin:admin@YOU_SERVER_IP:55672/vhost" # NOTE 55672 is RabbitMQ port for Upserver
+
+# example of use:
+
+from django_clickhouse_logger import capture_exception   
+try:
+    print(some_undefined_var)
+except Exception as e:
+    capture_exception(e)
+
+from simple_print import throw
+if log_condition == True:
+    throw({"tag":"my tag", "msg":{"hello":"world"}}, uri=SIMPLE_PRINT_AMQP_URI) 
 ```
 
 Userful integrations commands:

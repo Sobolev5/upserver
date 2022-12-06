@@ -24,10 +24,6 @@ RUN apt-get update && \
     apt-utils libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev libjpeg-dev libfreetype6-dev python-dev libpq-dev python-dev libxml2-dev libxslt-dev postgresql-client git && \
     pip3 install -U pip setuptools 
 
-RUN apt-get -y install cron
-COPY ./crontab /etc/cron.d/crontab
-RUN crontab /etc/cron.d/crontab
-
 WORKDIR /app/
 COPY ./ /app
 
