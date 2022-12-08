@@ -25,7 +25,7 @@ class ClickHouseLogger(models.Model):
     request_extra = models.TextField(null=True, blank=True)
     site = models.CharField(max_length=255, null=True, blank=True)   
     scheme = models.CharField(max_length=255, null=True, blank=True)  
-    body = models.CharField(max_length=255, null=True, blank=True)  
+    body = models.TextField(null=True, blank=True)  
     path = models.CharField(max_length=255, null=True, blank=True)  
     method = models.CharField(max_length=255, null=True, blank=True) 
     GET = models.TextField(null=True, blank=True)
@@ -54,8 +54,8 @@ class ClickHouseLogger(models.Model):
     threadName = models.CharField(max_length=255, null=True, blank=True) 
 
     class Meta:
-        verbose_name = 'Django Errors (django-clickhouse-logger)'
-        verbose_name_plural = 'Django Errors (django-clickhouse-logger)'
+        verbose_name = 'Django Errors'
+        verbose_name_plural = 'Django Errors'
 
     def __str__(self):
         return f"{self.message}"
@@ -93,8 +93,8 @@ class ClickHouseCaptureException(models.Model):
     message = models.CharField(max_length=255, null=True, blank=True) 
 
     class Meta:
-        verbose_name = 'Captured exceptions (django-clickhouse-logger)'
-        verbose_name_plural = 'Captured exceptions (django-clickhouse-logger)'
+        verbose_name = 'Captured exceptions'
+        verbose_name_plural = 'Captured exceptions'
 
     def __str__(self):
         return f"{self.message}"
@@ -125,8 +125,8 @@ class SimplePrintCatch(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Get alerts (simple-print)'
-        verbose_name_plural = 'Get alerts (simple-print)'
+        verbose_name = 'Get alerts'
+        verbose_name_plural = 'Get alerts'
 
     def __str__(self):
         return f"{self.message}"

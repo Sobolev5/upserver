@@ -84,6 +84,11 @@ docker logs upserver-clickhouse --tail 100 --follow
 docker logs upserver-rabbitmq --tail 100 --follow
 ```
 
+Migrate database (after pulling `upserver` updates):
+```sh
+docker exec upserver-interface python /app/manage.py migrate
+```
+
 Start `upserver`:
 ```sh
 docker-compose up --build -d
