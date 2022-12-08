@@ -4,7 +4,7 @@
 You can specify the ip of your server, login and password.  
 If your server is unavailable, `upserver` will connect automatically and execute restore commands.
   
-![](https://github.com/Sobolev5/upserver/tree/master/interface/static/upserver.png)
+![](https://github.com/Sobolev5/upserver/blob/master/interface/static/upserver.png)
 
 Example of use:  
 - server monitoring    
