@@ -110,17 +110,25 @@ cat upserver.sql | docker exec -i upserver-postgres psql -U upserver_db_user -d 
 ```
 
 # Integrations
-Upserver integrated with `simple-print` and `django-clickhouse-logger` from the box:
+Upserver integrated with `django-clickhouse-logger` and `simple-print` from the box:
 https://github.com/Sobolev5/django-clickhouse-logger (catch logs from Clickhouse)   
 https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)   
 
-  
-Example ENV for Django (**settings.py**): 
-```
-# first - install:
-# pip install simple-print
-# pip install django-clickhouse-logger 
-# second - put ENV variables in settings:
+
+First switch *.env* variables in your `upserver` local copy: 
+``` `sh  
+CLICKHOUSE_LOGGER_ENABLED=1
+SIMPLE_PRINT_ENABLED=1
+```  
+
+Second, install `django-clickhouse-logger` and `simple-print` on your project: 
+``` sh
+pip install simple-print
+pip install django-clickhouse-logger 
+```  
+
+And put this variables in your *settings.py* file:
+``` sh
 DJANGO_CLICKHOUSE_LOGGER_HOST = "YOU_SERVER_IP"
 DJANGO_CLICKHOUSE_LOGGER_PORT = 59000 # NOTE 59000 is Clickhouse port for Upserver
 DJANGO_CLICKHOUSE_LOGGER_USER = "default"
@@ -128,9 +136,10 @@ DJANGO_CLICKHOUSE_LOGGER_PASSWORD = "default"
 DJANGO_CLICKHOUSE_LOGGER_TTL_DAY = 3
 DJANGO_CLICKHOUSE_LOGGER_REQUEST_EXTRA = "session"
 SIMPLE_PRINT_AMQP_URI = "amqp://admin:admin@YOU_SERVER_IP:55672/vhost" # NOTE 55672 is RabbitMQ port for Upserver
+```
 
-# example of use:
-
+Example of use (client side):
+``` sh
 from django_clickhouse_logger import capture_exception   
 try:
     print(some_undefined_var)
