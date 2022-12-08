@@ -32,12 +32,14 @@ def get_clickhouse_logger_records():
             field_name = field.name
             if field_name in row and row[field_name]:         
                 setattr(record, field_name, row[field_name]) 
-        if created:
-            record.save()
-        else:
-            record.errors_count += 1
-            record.save()   
-            print(f"record saved id={record.id}")    
+
+        if record.exc_info:
+            if created:
+                record.save()
+            else:
+                record.errors_count += 1
+                record.save()   
+                print(f"record saved id={record.id}")    
 
     query = f"""
         TRUNCATE TABLE IF EXISTS django_clickhouse_logger.logger
