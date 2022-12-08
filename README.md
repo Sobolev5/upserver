@@ -4,6 +4,8 @@
 You can specify the ip of your server, login and password.  
 If your server is unavailable, `upserver` will connect automatically and execute restore commands.
   
+![](https://github.com/Sobolev5/upserver/tree/master/interface/static/upserver.png)
+
 Example of use:  
 - server monitoring    
 - uptime statistic    
@@ -116,12 +118,12 @@ https://github.com/Sobolev5/simple-print (catch logs from RabbitMQ)
 
 
 First switch *.env* variables in your `upserver` local copy: 
-``` `sh  
+``` sh  
 CLICKHOUSE_LOGGER_ENABLED=1
 SIMPLE_PRINT_ENABLED=1
 ```  
 
-Second, install `django-clickhouse-logger` and `simple-print` on your project: 
+Second make install: 
 ``` sh
 pip install simple-print
 pip install django-clickhouse-logger 
