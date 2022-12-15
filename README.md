@@ -32,9 +32,11 @@ POSTGRES_PASSWORD=upserver_db_password
 POSTGRES_HOST=upserver-postgres
 POSTGRES_PORT=5432
 
-# INTERFACE [CHANGE SECRET KEY]
+# INTERFACE [CHANGE SECRET KEY AND TELEGRAM BOT TOKEN]
 SECRET_KEY=django-insecure-@x5%xegdelq=s!fybiup=pktful_+!t%x42y1!hh_=-p7$kz9s 
 DEBUG=0
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_IDS=your_chat_id, another_admin_chat_id
 
 # LOGGER DB [CHANGE PASSWORD]
 CLICKHOUSE_HOST=upserver-clickhouse
@@ -174,7 +176,6 @@ If you want to add your own integration, you can easy make a fork.
 
 # TODO 
 > api  
-> server down alerts  
 > tests  
 
 

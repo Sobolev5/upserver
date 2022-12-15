@@ -1,7 +1,10 @@
+import requests
 from django.db import models
+from django.db.models import signals
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from monitoring.signals import change_commands_syntax
+from settings import TELEGRAM_BOT_TOKEN
+from settings import TELEGRAM_CHAT_IDS
 from settings import LOG_SIZE
 
 
@@ -22,7 +25,22 @@ class Monitor(models.Model):
     def __str__(self):
         return f"{self.name} {self.host}:{self.port}"
 
-post_save.connect(change_commands_syntax, sender=Monitor)
+    @classmethod
+    def change_commands_syntax(
+        cls,
+        sender,
+        instance,
+        created,
+        *args,
+        **kwargs
+    ):    
+        instance = kwargs["instance"]
+        instance.su_restore_commands = ";".join([x.strip() for x in instance.su_restore_commands.split("\n")])
+        signals.post_save.disconnect(change_commands_syntax, sender=Monitor)
+        instance.save()
+        signals.post_save.connect(change_commands_syntax, sender=Monitor)
+
+post_save.connect(Monitor.change_commands_syntax, sender=Monitor)
 
 
 class MonitorActivity(models.Model):
@@ -76,4 +94,18 @@ class RestoreActivity(models.Model):
         if created and (instance.id % LOG_SIZE == 0):
             RestoreActivity.objects.all().delete()
 
+    @classmethod
+    def send_notify_to_telegram_bot(
+        cls,
+        sender,
+        instance,
+        created,
+        *args,
+        **kwargs
+    ):
+        text = f"Restore activity: {self.monitor}\n\nRestore log{self.console_log}\n\nExit status:{self.exit_status}"
+        for chat_id in TELEGRAM_CHAT_IDS:
+            requests.post(url="https://api.telegram.org/bot{}/{}".format(TELEGRAM_BOT_TOKEN, "sendMessage"), data={"chat_id": chat_id, "text": text})
+
 post_save.connect(RestoreActivity.check_stat_size, sender=RestoreActivity)
+post_save.connect(RestoreActivity.send_notify_to_telegram_bot, sender=MonitorActivity)

@@ -30,7 +30,9 @@ def get_clickhouse_logger_records():
         record, created = ClickHouseLogger.objects.get_or_create(exc_hash=row["exc_hash"])
         for field in ClickHouseLogger._meta.fields:
             field_name = field.name
-            if field_name in row and row[field_name]:         
+            if field_name in row and row[field_name]:  
+                if len(row[field_name]) > 5000 and isinstance(row[field_name], str):
+                    row[field_name] = row[field_name][:5000]          
                 setattr(record, field_name, row[field_name]) 
 
         if record.exc_info:
@@ -39,7 +41,7 @@ def get_clickhouse_logger_records():
             else:
                 record.errors_count += 1
                 record.save()   
-                print(f"record saved id={record.id}")    
+                print(f"Record saved id={record.id}")    
 
     query = f"""
         TRUNCATE TABLE IF EXISTS django_clickhouse_logger.logger
@@ -75,7 +77,7 @@ def get_clickhouse_captured_exceptions():
         else:
             record.errors_count += 1
             record.save() 
-            print(f"record saved id={record.id}")   
+            print(f"Record saved id={record.id}")   
 
     query = f"""
         TRUNCATE TABLE IF EXISTS django_clickhouse_logger.capture_exception
@@ -99,5 +101,5 @@ def catch_simple_print_messages():
             catched.function_name = message["function_name"]
             catched.lineno = message["lineno"]
             catched.save() 
-            print(f"record saved id={catched.id}")    
+            print(f"Record saved id={catched.id}")    
 
