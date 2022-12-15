@@ -15,7 +15,12 @@ POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_IDS = os.getenv("TELEGRAM_CHAT_IDS", [])
+TELEGRAM_CHAT_IDS = []
+try:
+    if TELEGRAM_BOT_TOKEN: TELEGRAM_CHAT_IDS = [int(x) for x in os.getenv("TELEGRAM_CHAT_IDS").split(",")]
+except:
+    pass
+
 try:
     LOG_SIZE = int(os.getenv("LOG_SIZE"))
 except:
