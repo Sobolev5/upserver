@@ -30,8 +30,8 @@ def get_clickhouse_logger_records():
         record, created = ClickHouseLogger.objects.get_or_create(exc_hash=row["exc_hash"])
         for field in ClickHouseLogger._meta.fields:
             field_name = field.name
-            if field_name in row and row[field_name]:  
-                if len(row[field_name]) > 5000 and isinstance(row[field_name], str):
+            if field_name in row and row[field_name]: 
+                if isinstance(row[field_name], str) and len(row[field_name]) > 5000:
                     row[field_name] = row[field_name][:5000]          
                 setattr(record, field_name, row[field_name]) 
 
