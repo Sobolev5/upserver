@@ -1,0 +1,17 @@
+**/.bash_history
+**/.pytest_cache
+**/.gitconfig
+**/*.pyc
+**/.vscode-server/
+**/media/
+**/.cache/
+**/__pycache__/
+**/env/
+**/.env
+**/debug/
+**/target/
+**/Cargo.lock
+**/**/*.rs.bk
+**/.env
+/throw_catch1
+.env
