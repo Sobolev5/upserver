@@ -35,10 +35,11 @@ POSTGRES_HOST=upserver-postgres
 POSTGRES_PORT=5432
 
 # RABBITMQ [CHANGE PASSWORD] 
-RABBITMQ_HOST=upserver-rabbitmq
-RABBITMQ_PORT=5672
 RABBITMQ_USER=admin 
 RABBITMQ_PASSWORD=admin
+RABBITMQ_HOST=upserver-rabbitmq
+RABBITMQ_PORT=5672
+
 
 # INTERFACE [CHANGE SECRET KEY AND TELEGRAM BOT TOKEN]
 SECRET_KEY=django-insecure-@x5%xegdelq=s!fybiup=pktful_+!t%x42y1!hh_=-p7$kz9s 
@@ -54,7 +55,7 @@ docker-compose up --build -d
 
 Run initial script (Required):
 ```sh
-docker exec upserver-interface sh /app/initial_database.sh
+docker exec upserver-interface python run.py db_tasks "initial()"
 ```
 
 Add cron scheduler:
@@ -69,17 +70,27 @@ http://YOU_SERVER_IP:12345 # Here you can log in with ADMIN_USER and ADMIN_PASSW
 
 ## Useful commands
 
+Get shell:
+```sh
+docker exec -it upserver-interface sh
+```
+
+Clear logs:
+```sh
+docker exec upserver-interface python run.py db_tasks "clear_logs()"
+```
+
 Watch interface console:
 ```sh
 docker logs upserver-interface --tail 100 --follow
 ```
 
-Watch monitoring script console:
+Watch monitoring console:
 ```sh
 docker logs upserver-source --tail 100 --follow
 ```
 
-Watch dependencies script console:
+Watch dependencies console:
 ```sh
 docker logs upserver-postgres --tail 100 --follow
 docker logs upserver-rabbitmq --tail 100 --follow

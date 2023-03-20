@@ -40,6 +40,7 @@ services:
 
   upserver-interface:
     container_name: upserver-interface
+    env_file: .env
     build: 
       context: ./interface/
       dockerfile: Dockerfile 
