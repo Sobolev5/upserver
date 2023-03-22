@@ -2,6 +2,7 @@
 
 Logger configuration in settings.py:
 ```python
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -21,6 +22,7 @@ LOGGING = {
         "django.request": {"handlers": ["django_logger"], "level": "ERROR", 'propagate': False},
     },
 }
+
 ```
 
 If you want to test just change filter `require_debug_false` to `require_debug_true` 

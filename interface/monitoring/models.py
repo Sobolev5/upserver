@@ -1,4 +1,5 @@
 import requests
+from django.contrib import admin
 from django.db import models
 from django.db.models import signals
 from django.contrib.auth.models import User
@@ -52,6 +53,10 @@ class MonitorActivity(models.Model):
 
     class Meta:
         ordering  = ['-id']
+
+    def restore_hops(self):
+        return self.monitor.restore_hops
+    restore_hops.admin_order_field  = 'monitor__restore_hops'
 
     @classmethod
     def check_stat_size(

@@ -31,7 +31,7 @@ admin.site.register(Monitor, MonitorAdmin)
 
 
 class MonitorActivityAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in MonitorActivity._meta.fields]
+    list_display = [f.name for f in MonitorActivity._meta.fields] + ["restore_hops"]
     list_filter = ("monitor__name",)
 admin.site.register(MonitorActivity, MonitorActivityAdmin)
 

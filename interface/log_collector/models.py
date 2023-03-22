@@ -194,9 +194,9 @@ class DjangoException(models.Model):
     errors_count = models.PositiveIntegerField(default=0)
     uuid = models.CharField(max_length=255, null=True, blank=True)
     asctime = models.DateTimeField(auto_now_add=True)    
-    exc_info = models.CharField(max_length=255, null=True, blank=True)
+    exc_info = models.TextField(null=True, blank=True)
     exc_hash = models.CharField(max_length=255, unique=True)
-    message = models.CharField(max_length=255, null=True, blank=True) 
+    message = models.CharField(max_length=5000, null=True, blank=True) 
     creation_date = models.DateTimeField(auto_now_add=True)
 
 
