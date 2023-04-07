@@ -4,39 +4,41 @@ services:
 
   upserver-postgres:
     container_name: upserver-postgres
+    env_file: .env
     image: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-db}
       PGDATA: /data/pgdata
     volumes:
-      - upserver-postgres:/data/pgdata
+      - upserver-postgres-volume:/data/pgdata
     ports:
       - "55432:5432"
     expose:
       - "5432"
     restart: unless-stopped
     networks:
-      - upserver  
+      - upserver-network
 
   upserver-rabbitmq:
     container_name: upserver-rabbitmq
+    env_file: .env
     image: 'rabbitmq:3.11.4-management'
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin}
       RABBITMQ_DEFAULT_VHOST: vhost
+    expose:
+      - "5672" 
     ports:
       - '55672:5672'
-      - '51567:15672'
-    expose:
-      - "5672"    
+      - '51567:15672'   
     volumes:
-      - upserver-rabbitmq:/var/lib/rabbitmq/mnesia/
+      - upserver-rabbitmq-volume:/var/lib/rabbitmq/mnesia/
     restart: unless-stopped
     networks:
-      - upserver
+      - upserver-network 
 
   upserver-interface:
     container_name: upserver-interface
@@ -45,27 +47,47 @@ services:
       context: ./interface/
       dockerfile: Dockerfile 
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      DEBUG: ${DEBUG}
-      SECRET_KEY: ${SECRET_KEY} 
-      ADMIN_USER: ${ADMIN_USER}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD} 
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}        
+      DEBUG: ${DEBUG:-1}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-db}
+      POSTGRES_HOST: ${POSTGRES_HOST:-upserver-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}    
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-@x5%xegdelq=s!fybiup=pktful_+!t%x42y1!hh_=-p71kz9s} 
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin} 
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-upserver-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}        
     restart: unless-stopped 
     depends_on: 
       - upserver-postgres 
       - upserver-rabbitmq 
     ports:
-      - 12345:12345
+      - "12345:12345"
     networks:
-      - upserver  
+      - upserver-network   
+
+  upserver-alerts:
+    container_name: upserver-alerts
+    env_file: .env
+    build: 
+      context: ./alerts/
+      dockerfile: Dockerfile 
+    environment:
+      DEBUG: ${DEBUG:-1}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-upserver-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}   
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   
+      TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}       
+    restart: always 
+    depends_on: 
+      - upserver-rabbitmq 
+    networks:
+      - upserver-network   
 
   upserver-monitoring:
     container_name: upserver-monitoring
@@ -73,23 +95,23 @@ services:
       context: ./monitoring/
       dockerfile: Dockerfile  
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      DEBUG: ${DEBUG}  
+      DEBUG: ${DEBUG:-1}  
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-db}
+      POSTGRES_HOST: ${POSTGRES_HOST:-upserver-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}     
     restart: unless-stopped 
     depends_on: 
       - upserver-postgres
     networks:
-      - upserver  
+      - upserver-network 
 
 networks:
-  upserver:
+  upserver-network:
     driver: bridge
   
 volumes:
-  upserver-postgres:
-  upserver-rabbitmq:
+  upserver-postgres-volume:
+  upserver-rabbitmq-volume:
   

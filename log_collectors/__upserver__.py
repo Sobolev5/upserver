@@ -126,3 +126,4 @@ class LoggerHandler(logging.StreamHandler):
                 process_record(record)
             except Exception as e:
                 logging.exception(f"{e}")
+

@@ -6,7 +6,11 @@ from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
 from ninja import ModelSchema
 from settings import LOG_SIZE
-   
+from settings import ALERTS
+from settings import DEBUG
+from django.forms.models import model_to_dict
+import __upserver__
+
 
 class AnyLogger(models.Model):
     assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE) 
@@ -49,6 +53,10 @@ class AnyLogger(models.Model):
                     setattr(record, field_name, row[field_name]) 
             try:
                 record.save()
+                if ALERTS:
+                    if DEBUG:
+                        sprint("throw to alerts", c="green")
+                    __upserver__.any_throw(model_to_dict(record), tag="alerts")
             except Exception as error:
                 exc_info = traceback.format_exception(error)
                 exc_info = "\n".join(exc_info)
@@ -157,6 +165,8 @@ class DjangoLogger(models.Model):
                         setattr(record, field_name, payload[field_name]) 
                 try:
                     record.save()
+                    if ALERTS:
+                        __upserver__.any_throw(model_to_dict(record), tag="alerts")
                 except Exception as error:
                     exc_info = traceback.format_exception(error)
                     exc_info = "\n".join(exc_info)
@@ -235,6 +245,8 @@ class DjangoException(models.Model):
                         setattr(record, field_name, payload[field_name]) 
                 try:
                     record.save()
+                    if ALERTS:
+                        __upserver__.any_throw(model_to_dict(record), tag="alerts")
                 except Exception as error:
                     exc_info = traceback.format_exception(error)
                     exc_info = "\n".join(exc_info)

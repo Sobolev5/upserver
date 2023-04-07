@@ -23,38 +23,41 @@ mv .env.example .env
 
 Change variables in *.env* file:
 ```sh
-# ADMIN USER [CHANGE PASSWORD]
+# ADMIN USER 
 ADMIN_USER=admin
-ADMIN_PASSWORD=password
+ADMIN_PASSWORD=admin
 
-# POSTGRES  [CHANGE PASSWORD]
-POSTGRES_DB=upserver_db
-POSTGRES_USER=upserver_db_user
-POSTGRES_PASSWORD=upserver_db_password
+# INTERFACE [CHANGE SECRET KEY]
+SECRET_KEY=django-insecure-@x5%xegdelq=s!fybiup=pktful_+!t%x42y1!hh_=-p71kz9s 
+DEBUG=0
+
+# DATABASE 
 POSTGRES_HOST=upserver-postgres
 POSTGRES_PORT=5432
+POSTGRES_DB=db
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
 
-# RABBITMQ [CHANGE PASSWORD] 
-RABBITMQ_USER=admin 
-RABBITMQ_PASSWORD=admin
+# RABBITMQ
 RABBITMQ_HOST=upserver-rabbitmq
 RABBITMQ_PORT=5672
+RABBITMQ_USER=admin 
+RABBITMQ_PASSWORD=admin
 
-
-# INTERFACE [CHANGE SECRET KEY AND TELEGRAM BOT TOKEN]
-SECRET_KEY=django-insecure-@x5%xegdelq=s!fybiup=pktful_+!t%x42y1!hh_=-p7$kz9s 
-DEBUG=0
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-TELEGRAM_CHAT_IDS=your_chat_id, another_admin_chat_id
+# ALERTS
+ALERTS=1
+TELEGRAM_BOT_TOKEN=telegram_bot_token
+TELEGRAM_CHAT_IDS=chat_id_1, chat_id_2  # For get your own chat ID use https://t.me/myidbot
 ```
 
 Start `upserver`:
 ```sh
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
-Run initial script (Required):
+Run initial script (Required!):
 ```sh
+docker exec upserver-interface python manage.py migrate
 docker exec upserver-interface python run.py db_tasks "initial()"
 ```
 
@@ -70,6 +73,12 @@ http://YOU_SERVER_IP:12345 # Here you can log in with ADMIN_USER and ADMIN_PASSW
 
 ## Useful commands
 
+Start/stop `upserver`:
+```sh
+docker compose up --build -d
+docker compose down
+```
+
 Get shell:
 ```sh
 docker exec -it upserver-interface sh
@@ -80,20 +89,13 @@ Clear logs:
 docker exec upserver-interface python run.py db_tasks "clear_logs()"
 ```
 
-Watch interface console:
-```sh
-docker logs upserver-interface --tail 100 --follow
-```
-
-Watch monitoring console:
-```sh
-docker logs upserver-source --tail 100 --follow
-```
-
-Watch dependencies console:
+Watch consoles:
 ```sh
 docker logs upserver-postgres --tail 100 --follow
 docker logs upserver-rabbitmq --tail 100 --follow
+docker logs upserver-interface --tail 100 --follow
+docker logs upserver-alerts --tail 100 --follow
+docker logs upserver-monitoring --tail 100 --follow
 ```
 
 Migrate database (after pulling `upserver` updates):
@@ -101,24 +103,20 @@ Migrate database (after pulling `upserver` updates):
 docker exec upserver-interface python /app/manage.py migrate
 ```
 
-Start `upserver`:
-```sh
-docker-compose up --build -d
-```
-
-Stop `upserver`:
-```sh
-docker-compose down
-```
-
 Backup database:
 ```sh
-docker-compose exec -T upserver-postgres sh -c 'pg_dump -cU upserver_db_user upserver_db' > upserver.sql
+docker compose exec -T upserver-postgres sh -c 'pg_dump -cU admin db' > upserver.sql
 ```
 
 Restore from backup:
 ```sh
-cat upserver.sql | docker exec -i upserver-postgres psql -U upserver_db_user -d upserver_db
+cat upserver.sql | docker exec -i upserver-postgres psql -U admin -d db
+```
+
+Clear all:
+```sh
+docker compose down
+docker system prune -a
 ```
 
 # Log collectors

@@ -9,6 +9,7 @@ load_dotenv()
 # ENV
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "1"
+ALERTS = os.getenv("ALERTS") == "1"
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -115,5 +116,40 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+def skip_static_requests(record):
+    return not record.args[0].startswith('GET /static/')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'skip_static_requests': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': skip_static_requests
+        }
+    },
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'django.server': {
+            'level': 'INFO',
+            'filters': ['skip_static_requests'],  
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    }
+}
 
 
