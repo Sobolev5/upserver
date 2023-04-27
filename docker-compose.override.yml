@@ -7,6 +7,6 @@ services:
       - ./interface:/interface
 
   upserver-alerts: 
-    entrypoint: [ "uvicorn", "app:app", "--reload", "--host", "0.0.0.0", "--port", "12346" ]
+    entrypoint: [ "uvicorn", "app:app", "--reload", "--host", "0.0.0.0" ]
     volumes:
       - ./alerts:/alerts

@@ -36,6 +36,10 @@ class AnyLogger(models.Model):
         try:
             row = AnyLoggerSchema(**row).dict()     
         except Exception as error:
+
+            if DEBUG:
+                sprint(error, c="red", p=1)
+
             exc_info = traceback.format_exception(error)
             exc_info = "\n".join(exc_info)
             collector_exception = CollectorException() 
@@ -54,10 +58,12 @@ class AnyLogger(models.Model):
             try:
                 record.save()
                 if ALERTS:
-                    if DEBUG:
-                        sprint("throw to alerts", c="green")
-                    __upserver__.any_throw(model_to_dict(record), tag="alerts")
+                    __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
             except Exception as error:
+
+                if DEBUG:
+                    sprint(error, c="red", p=1)
+
                 exc_info = traceback.format_exception(error)
                 exc_info = "\n".join(exc_info)
                 collector_exception = CollectorException() 
@@ -92,10 +98,10 @@ class DjangoLogger(models.Model):
     assigned_to = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=24, choices=StatusChoices.choices, default=StatusChoices.NEW)
     errors_count = models.PositiveIntegerField(default=0)
-    uuid = models.CharField(max_length=255, null=True, blank=True)
     asctime = models.DateTimeField(auto_now_add=True)    
     exc_info = models.TextField(null=True, blank=True)
     exc_hash = models.CharField(max_length=255, unique=True)
+    uuid = models.CharField(max_length=255, null=True, blank=True)
     user = models.CharField(max_length=255, null=True, blank=True)
     user_id = models.PositiveIntegerField(default=22)
     request_extra = models.TextField(null=True, blank=True)
@@ -143,6 +149,10 @@ class DjangoLogger(models.Model):
         try:
             payload = DjangoLoggerSchema(**payload).dict()     
         except Exception as error:  
+
+            if DEBUG:
+                sprint(error, c="red", p=1)    
+
             exc_info = traceback.format_exception(error)
             exc_info = "\n".join(exc_info)
             collector_exception = CollectorException() 
@@ -157,6 +167,10 @@ class DjangoLogger(models.Model):
             if record_check:
                 record_check.errors_count += 1
                 record_check.save()
+
+                if ALERTS:
+                    __upserver__.any_throw(model_to_dict(record_check), routing_key="alerts")    
+
             else:
                 record = DjangoLogger()
                 for field in cls._meta.fields:             
@@ -166,8 +180,12 @@ class DjangoLogger(models.Model):
                 try:
                     record.save()
                     if ALERTS:
-                        __upserver__.any_throw(model_to_dict(record), tag="alerts")
+                        __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
                 except Exception as error:
+
+                    if DEBUG:
+                        sprint(error, c="red", p=1)                   
+
                     exc_info = traceback.format_exception(error)
                     exc_info = "\n".join(exc_info)
                     collector_exception = CollectorException()                    
@@ -218,11 +236,14 @@ class DjangoException(models.Model):
         from log_collector.schema import DjangoExceptionSchema
         fn_data = f"{row}"
         payload = row["payload"]
-
         save = True
         try:
             payload = DjangoExceptionSchema(**payload).dict()     
         except Exception as error:  
+
+            if DEBUG:
+                sprint(error, c="red", p=1)    
+
             exc_info = traceback.format_exception(error)
             exc_info = "\n".join(exc_info)
             collector_exception = CollectorException() 
@@ -237,7 +258,15 @@ class DjangoException(models.Model):
             if record_check:
                 record_check.errors_count += 1
                 record_check.save()
+
+                if ALERTS:
+                    try:
+                        __upserver__.any_throw(model_to_dict(record_check), routing_key="alerts")    
+                    except Exception as e:
+                        print(e)
+
             else:
+
                 record = DjangoException()
                 for field in cls._meta.fields:             
                     field_name = field.name
@@ -246,8 +275,12 @@ class DjangoException(models.Model):
                 try:
                     record.save()
                     if ALERTS:
-                        __upserver__.any_throw(model_to_dict(record), tag="alerts")
+                        __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
                 except Exception as error:
+
+                    if DEBUG:
+                        sprint(error, c="red", p=1)             
+
                     exc_info = traceback.format_exception(error)
                     exc_info = "\n".join(exc_info)
                     collector_exception = CollectorException()                    

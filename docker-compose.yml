@@ -5,10 +5,10 @@ services:
   upserver-postgres:
     container_name: upserver-postgres
     env_file: .env
-    image: postgres
+    image: 'postgres:15.2'
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       POSTGRES_DB: ${POSTGRES_DB:-db}
       PGDATA: /data/pgdata
     volumes:
@@ -48,8 +48,8 @@ services:
       dockerfile: Dockerfile 
     environment:
       DEBUG: ${DEBUG:-1}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       POSTGRES_DB: ${POSTGRES_DB:-db}
       POSTGRES_HOST: ${POSTGRES_HOST:-upserver-postgres}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}    

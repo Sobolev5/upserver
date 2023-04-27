@@ -52,7 +52,7 @@ TELEGRAM_CHAT_IDS=chat_id_1, chat_id_2  # For get your own chat ID use https://t
 
 Start `upserver`:
 ```sh
-docker compose up --build -d
+docker compose -f docker-compose.yml up --build -d
 ```
 
 Run initial script (Required!):
@@ -63,7 +63,8 @@ docker exec upserver-interface python run.py db_tasks "initial()"
 
 Add cron scheduler:
 ```sh
-echo '* * * * * docker exec -i upserver-interface python /app/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -i upserver-interface python /interface/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec -i upserver-alerts python /alerts/run.py &>/dev/null' >> /var/spool/cron/root 
 ```
 
 Open UI:  
@@ -75,13 +76,19 @@ http://YOU_SERVER_IP:12345 # Here you can log in with ADMIN_USER and ADMIN_PASSW
 
 Start/stop `upserver`:
 ```sh
+docker compose -f docker-compose.yml up --build -d
+docker compose down
+```
+
+Start/stop `upserver` dev mode (with `docker-compose.override.yml`): 
+```sh
 docker compose up --build -d
 docker compose down
 ```
 
 Get shell:
 ```sh
-docker exec -it upserver-interface sh
+docker exec -it upserver-interface bash
 ```
 
 Clear logs:
@@ -100,7 +107,7 @@ docker logs upserver-monitoring --tail 100 --follow
 
 Migrate database (after pulling `upserver` updates):
 ```sh
-docker exec upserver-interface python /app/manage.py migrate
+docker exec upserver-interface python /interface/manage.py migrate
 ```
 
 Backup database:
@@ -117,6 +124,16 @@ Clear all:
 ```sh
 docker compose down
 docker system prune -a
+```
+
+Reinstall all:
+```sh
+docker compose down
+docker rm -f $(docker ps -a -q)
+docker volume rm $(docker volume ls -q)
+docker compose -f docker-compose.yml up --build -d
+docker exec upserver-interface python manage.py migrate
+docker exec upserver-interface python run.py db_tasks "initial()"
 ```
 
 # Log collectors

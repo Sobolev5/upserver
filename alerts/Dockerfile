@@ -1,6 +1,6 @@
 FROM python:3.11.2-buster
 
-MAINTAINER Sobolev Andrey
+LABEL Sobolev Andrey
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -33,5 +33,5 @@ COPY . .
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
-ENTRYPOINT uvicorn app:app --host 0.0.0.0 --port 12346
+ENTRYPOINT uvicorn app:app --host 0.0.0.0 
 

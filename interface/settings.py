@@ -22,6 +22,7 @@ RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 AMQP_URI = f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/vhost"
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_IDS = []
+
 try:
     if TELEGRAM_BOT_TOKEN: TELEGRAM_CHAT_IDS = [int(x) for x in os.getenv("TELEGRAM_CHAT_IDS").split(",")]
 except:
@@ -118,8 +119,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 def skip_static_requests(record):
-    return not record.args[0].startswith('GET /static/')
+    if isinstance(record.args[0], str):
+        return not record.args[0].startswith('GET /static/')
+    else:
+        return False
 
+        
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
