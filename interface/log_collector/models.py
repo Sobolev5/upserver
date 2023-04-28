@@ -57,8 +57,10 @@ class AnyLogger(models.Model):
                     setattr(record, field_name, row[field_name]) 
             try:
                 record.save()
+
                 if ALERTS:
                     __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
+                    
             except Exception as error:
 
                 if DEBUG:
@@ -167,10 +169,6 @@ class DjangoLogger(models.Model):
             if record_check:
                 record_check.errors_count += 1
                 record_check.save()
-
-                if ALERTS:
-                    __upserver__.any_throw(model_to_dict(record_check), routing_key="alerts")    
-
             else:
                 record = DjangoLogger()
                 for field in cls._meta.fields:             
@@ -179,8 +177,10 @@ class DjangoLogger(models.Model):
                         setattr(record, field_name, payload[field_name]) 
                 try:
                     record.save()
+
                     if ALERTS:
                         __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
+
                 except Exception as error:
 
                     if DEBUG:
@@ -259,12 +259,6 @@ class DjangoException(models.Model):
                 record_check.errors_count += 1
                 record_check.save()
 
-                if ALERTS:
-                    try:
-                        __upserver__.any_throw(model_to_dict(record_check), routing_key="alerts")    
-                    except Exception as e:
-                        print(e)
-
             else:
 
                 record = DjangoException()
@@ -274,8 +268,10 @@ class DjangoException(models.Model):
                         setattr(record, field_name, payload[field_name]) 
                 try:
                     record.save()
+
                     if ALERTS:
                         __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
+
                 except Exception as error:
 
                     if DEBUG:
