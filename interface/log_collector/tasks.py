@@ -1,6 +1,7 @@
 import datetime
 import traceback
 import pprint
+import __upserver__
 from functools import wraps
 from croniter import croniter
 from throw_catch import catch
@@ -80,10 +81,16 @@ def run_every_minute():
             except Exception as error:
                 exc_info = traceback.format_exception(error)
                 exc_info = "\n".join(exc_info)
+                exc_info += f"\n AMQP_URI={AMQP_URI}"
                 collector_exception = models.CollectorException() 
                 collector_exception.fn_name = fn_name
                 collector_exception.exc_info = exc_info
                 collector_exception.save()
 
 
+def test_alerts_sending():
+    # python run.py log_collector.tasks "test_alerts_sending()"
+    # docker exec upserver-interface python run.py log_collector.tasks "test_alerts_sending()"
+    __upserver__.any_throw("test message", routing_key="alerts")
+    sprint("test_alerts_sending [ OK ]", c="green")
 

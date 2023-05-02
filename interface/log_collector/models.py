@@ -105,7 +105,7 @@ class DjangoLogger(models.Model):
     exc_hash = models.CharField(max_length=255, unique=True)
     uuid = models.CharField(max_length=255, null=True, blank=True)
     user = models.CharField(max_length=255, null=True, blank=True)
-    user_id = models.PositiveIntegerField(default=22)
+    user_id = models.PositiveIntegerField(default=22, null=True, blank=True)
     request_extra = models.TextField(null=True, blank=True)
     site = models.CharField(max_length=255, null=True, blank=True)   
     scheme = models.CharField(max_length=255, null=True, blank=True)  
