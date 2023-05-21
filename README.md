@@ -2,17 +2,16 @@
 
 `upserver` it is a free monitoring tool with **repair** option.  
 You can specify the ip of your server, login and password.  
-If your server is unavailable, `upserver` will connect automatically and execute restore commands.
+If your server is unavailable, `upserver` will connect automatically  
+and execute restore commands.
   
 ![](https://github.com/Sobolev5/upserver/blob/master/interface/static/upserver.png)
 
 Example of use:  
 - server monitoring    
 - uptime statistic  
-- env secrets (in development) 
-- log collectors (in development) 
-- server down alerting (in development)    
-
+- log collectors
+- server down alerting 
    
 ## Install and run
 Clone repository first:   
@@ -55,7 +54,7 @@ Start `upserver`:
 docker compose -f docker-compose.yml up --build -d
 ```
 
-Run initial script (Required!):
+Run initial script (*Required*):
 ```sh
 docker exec upserver-interface python manage.py migrate
 docker exec upserver-interface python run.py db_tasks "initial()"
@@ -63,8 +62,8 @@ docker exec upserver-interface python run.py db_tasks "initial()"
 
 Add cron scheduler:
 ```sh
-echo '* * * * * docker exec -i upserver-interface python /interface/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
-echo '* * * * * docker exec -i upserver-alerts python /alerts/run.py &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec upserver-interface python /interface/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec upserver-alerts python /alerts/run.py &>/dev/null' >> /var/spool/cron/root 
 ```
 
 Open UI:  
@@ -72,23 +71,26 @@ Open UI:
 http://YOU_SERVER_IP:12345 # Here you can log in with ADMIN_USER and ADMIN_PASSWORD
 ```
 
-## Useful commands
-
+## Commands
 Start/stop `upserver`:
 ```sh
-docker compose -f docker-compose.yml up --build -d
-docker compose down
+docker compose -f docker-compose.prod.yml up --build -db
 ```
 
-Start/stop `upserver` dev mode (with `docker-compose.override.yml`): 
+Start/stop `upserver` in dev mode: 
 ```sh
-docker compose up --build -d
-docker compose down
+docker compose -f docker-compose.dev.yml up  up --build -d
+```
+
+Run tests: 
+```sh
+docker compose -f docker-compose.test.yml up  up --build -d
 ```
 
 Get shell:
 ```sh
 docker exec -it upserver-interface bash
+docker exec -it upserver-alerts bash
 ```
 
 Clear logs:
@@ -120,15 +122,10 @@ Restore from backup:
 cat upserver.sql | docker exec -i upserver-postgres psql -U admin -d db
 ```
 
-Clear all:
-```sh
-docker compose down
-docker system prune -a
-```
-
 Reinstall all:
 ```sh
 docker compose down
+docker system prune -a
 docker rm -f $(docker ps -a -q)
 docker volume rm $(docker volume ls -q)
 docker compose -f docker-compose.yml up --build -d
@@ -137,9 +134,9 @@ docker exec upserver-interface python run.py db_tasks "initial()"
 ```
 
 # Log collectors
-Upserver log collectors integrated with `throw-catch` from the box:
+`Upserver` integrated with `throw-catch` from the box:
 https://github.com/Sobolev5/throw-catch 
-So you can easy write your own collector through RabbitMQ queues.
+So you can easy write your own log collector through RabbitMQ queues.
 
 See `log_collectors` folder for examples.
 

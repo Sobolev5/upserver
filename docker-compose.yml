@@ -83,7 +83,6 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}   
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   
       TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}       
-    restart: always 
     depends_on: 
       - upserver-rabbitmq 
     networks:
@@ -101,7 +100,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-db}
       POSTGRES_HOST: ${POSTGRES_HOST:-upserver-postgres}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}     
-    restart: unless-stopped 
     depends_on: 
       - upserver-postgres
     networks:

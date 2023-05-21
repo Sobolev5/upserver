@@ -1,0 +1,17 @@
+version: '3.2'
+
+services:
+
+  upserver-interface:
+    environment:
+      DEBUG: 1
+    cmd: [ "python", "manage.py", "runserver", "0.0.0.0:12345" ]
+    volumes:
+      - ./interface:/interface
+
+  upserver-alerts: 
+    environment:
+      DEBUG: 1
+    cmd: [ "uvicorn", "app:app", "--reload", "--host", "0.0.0.0" ]
+    volumes:
+      - ./alerts:/alerts

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from log_collector.models import DjangoLogger, DjangoException, \
                                  AnyLogger, NginxLogger, \
-                                 CollectorException   
+                                 CollectorException, CronScheduler  
 
 
 class AnyLoggerAdmin(admin.ModelAdmin):
@@ -39,3 +39,9 @@ class CollectorExceptionAdmin(admin.ModelAdmin):
     list_display = [f.name for f in CollectorException._meta.fields]
     search_fields = [f.name for f in CollectorException._meta.fields if not isinstance(f, models.ForeignKey)]
 admin.site.register(CollectorException, CollectorExceptionAdmin)
+
+
+class CronSchedulerAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in CronScheduler._meta.fields]
+    search_fields = [f.name for f in CronScheduler._meta.fields if not isinstance(f, models.ForeignKey)]
+admin.site.register(CronScheduler, CronSchedulerAdmin)

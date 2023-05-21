@@ -1,71 +1,44 @@
+import re
+import os
+import time
+import gzip
+import pika
 import datetime
-import json
-from throw_catch import throw
+import pickle
+from dotenv import load_dotenv
 
-AMQP_URI = f"amqp://admin:admin@127.0.0.1:5672/vhost"
-BATCH_SIZE = 1000
-BATCH_COUNTER = 0
-LOG_FILE = "/var/log/nginx/access.log"
+
+load_dotenv()
+
+
+AMQP_URI = os.getenv("AMQP_URI", "amqp://admin:admin@127.0.0.1:5672/vhost")
+NGINX_LOG_DIR = os.getenv("NGINX_LOG_DIR", "/var/log/nginx")
+DEBUG = os.getenv("DEBUG", False)
 
 
 def parse_nginx_log():
-    datetime_now = datetime.datetime.now()
-    day_ago = datetime_now - datetime.timedelta(days=1)
-    day_ago  = day_ago.strftime("%Y-%m-%d")
-    
-    try:
-        with open(LOG_FILE) as f:
-            payload = None
-            for line in f:
-                try:
-                    payload = json.loads(line)
-                except:
-                    continue
-                
-                payload["request_timestamp"] = datetime.datetime.fromisoformat(payload["request_timestamp"]).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
-                payload["http_user_agent"] = "%s..." % payload["http_user_agent"][:40]
-                payload["request_uri"] = "%s..." % payload["request_uri"][:200]
-            
-                if "url" in payload["request_uri"]:
-                    continue
+    now_date = datetime.datetime.now().date()
+    for f in os.listdir(NGINX_LOG_DIR):
+        f_path = os.path.join(NGINX_LOG_DIR, f)
+        f_creation_date = datetime.datetime.strptime(time.ctime(os.path.getctime(f_path)), "%c").date()
+        if now_date == f_creation_date:
 
-                if not payload["scheme"]:
-                    payload["scheme"] = "http"  
+            if f.endswith(".gz"):
+                f_open = gzip.open(f_path, mode="rb")
+            else:
+                f_open = open(f_path, mode="rb")
+            f_binary = f_open.read()
+            f_open.close()
 
-                if not payload["request_method"]:
-                    payload["request_method"] = "UNKNOWN"    
+            connection = pika.BlockingConnection(pika.URLParameters(AMQP_URI))
+            channel = connection.channel()
+            channel.queue_declare(queue='nginx_log_collector')
+            channel.basic_publish(exchange='', routing_key='nginx_log_collector', body=f_binary)
+            connection.close()
 
-                strip_dict = {}
-                for k, v in payload.items():
-                    if isinstance(v, str):
-                        v = v.strip()
-                    strip_dict[k] = v
-                payload = strip_dict
+            if DEBUG:
+                print("OK")
 
-                BATCH_COUNTER += 1
-                if BATCH_COUNTER % BATCH_SIZE == 0:
-                    try:
-                        # TODO throw
-                        print(f'ok {BATCH_SIZE}')
-                    except Exception as e:
-                        print(e)
-                        continue
-                
-            if payload:
-                # last records
-                try:
-                    # TODO throw
-                    print(f'ok {BATCH_SIZE}')
-                except Exception as e:
-                    print(e)
-                
-            f = open(LOG_FILE, "w+")
-            f.truncate()
-            f.close()
-    except:
-        f = open(LOG_FILE, "w+")
-        f.truncate()
-        f.close()
 
 if __name__ == "__main__":
     parse_nginx_log()

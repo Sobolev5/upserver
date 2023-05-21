@@ -1,6 +1,6 @@
 # upserver-django-logger
-
-Logger configuration in settings.py:
+First copy *__upserver__.py* to Django root folder (where *settings.py* file located).
+Next change *settings.py*:
 ```python
 
 LOGGING = {
@@ -15,25 +15,25 @@ LOGGING = {
     },
     "handlers": {
         "console": {"level": "INFO", "filters": ["require_debug_true"], "class": "logging.StreamHandler", "formatter": "console"},
-        "django_logger": {"level": "ERROR", "filters": ["require_debug_false"], "class": "django_clickhouse_logger.handlers.LoggerHandler"},              
+        "upserver": {"level": "ERROR", "filters": ["require_debug_false"], "class": "__upserver__.LoggerHandler"},              
     }, 
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO",},
-        "django.request": {"handlers": ["django_logger"], "level": "ERROR", 'propagate': False},
+        "django.request": {"handlers": ["upserver"], "level": "ERROR", 'propagate': False},
     },
 }
 
 ```
 
 If you want to test just change filter `require_debug_false` to `require_debug_true` 
-for `django_logger` handler and raise error in any django view.  
+for `upserver` handler and raise error in any django view.  
   
 
 # Capture exception
 To catch exceptions manually:
 ```python
 
-from django_logger import capture_exception   
+from __upserver__ import capture_exception   
 
 try:
     print(undefined_variable)
@@ -49,6 +49,6 @@ except Exception as e:
 # Collect logs on upserver side
 For collect logs add this command to cron:
 ```sh
-echo '* * * * * docker exec -i upserver-interface python /app/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
+echo '* * * * * docker exec upserver-interface python /interface/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
 ```
 

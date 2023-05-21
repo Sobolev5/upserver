@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEBUG = os.getenv("DEBUG") == "1"
+TEST = os.getenv("TEST") == "1"
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
 RABBITMQ_USER = os.getenv("RABBITMQ_USER")

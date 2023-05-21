@@ -1,0 +1,13 @@
+version: '3.2'
+
+services:
+
+  upserver-interface:
+    environment:
+      TEST: 1
+    cmd: [ "pytest" ]
+
+  upserver-alerts: 
+    environment:
+      TEST: 1
+    cmd: [ "pytest" ]

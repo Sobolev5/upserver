@@ -1,0 +1,2 @@
+2023/05/10 05:28:57 [error] 2357706#0: *760138 connect() failed (111: Connection refused) while connecting to upstream, client: 89.108.77.63, server: andrey-sobolev.ru, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:21001/", host: "andrey-sobolev.ru"
+2023/05/10 05:28:57 [error] 2357706#0: *760140 connect() failed (111: Connection refused) while connecting to upstream, client: 89.108.77.63, server: andrey-sobolev.ru, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:21001/", host: "andrey-sobolev.ru"

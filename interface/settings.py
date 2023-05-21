@@ -9,6 +9,8 @@ load_dotenv()
 # ENV
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "1"
+TEST = os.getenv("TEST") == "1"
+PROD = os.getenv("PROD") == "1"
 ALERTS = os.getenv("ALERTS") == "1"
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -23,8 +25,10 @@ AMQP_URI = f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITM
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_IDS = []
 
+
 try:
-    if TELEGRAM_BOT_TOKEN: TELEGRAM_CHAT_IDS = [int(x) for x in os.getenv("TELEGRAM_CHAT_IDS").split(",")]
+    if TELEGRAM_BOT_TOKEN: 
+        TELEGRAM_CHAT_IDS = [int(x) for x in os.getenv("TELEGRAM_CHAT_IDS").split(",")]
 except:
     pass
 
@@ -48,6 +52,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -55,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'env_secrets',
     'log_collector',
     'monitoring'
 ]

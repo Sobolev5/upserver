@@ -1,9 +1,10 @@
-import orjson
 import aiohttp
 import pprint
+import asyncio
 from simple_print import sprint
 from throw_catch import catch
 from settings import DEBUG
+from settings import TEST
 from settings import AMQP_URI
 from settings import TELEGRAM_BOT_TOKEN
 from settings import TELEGRAM_CHAT_IDS
@@ -34,6 +35,7 @@ class Messager:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
 
         for chat_id in TELEGRAM_CHAT_IDS:
+
             attempts = 5
             params = {
                 "chat_id": chat_id,
@@ -42,12 +44,17 @@ class Messager:
 
             while attempts >= 0:
                 async with aiohttp.ClientSession() as session:
+
+                    if TEST:
+                        print("OK")
+                        break
+
                     async with session.get(url, params=params) as resp:
                         if resp.status == 200:
                             return
                         elif resp.status == 429:
                             attempts -= 1
-                            await asyncio.sleep(throttle_delay)
+                            await asyncio.sleep(1)
                             continue
                         else:
                             raise RuntimeError(f"Bad HTTP response: {resp}")

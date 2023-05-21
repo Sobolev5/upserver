@@ -8,7 +8,10 @@ from ninja import ModelSchema
 from settings import LOG_SIZE
 from settings import ALERTS
 from settings import DEBUG
+from settings import TEST
+from settings import PROD
 from django.forms.models import model_to_dict
+from log_collector.utils import parse_nginx_log
 import __upserver__
 
 
@@ -31,8 +34,8 @@ class AnyLogger(models.Model):
     def save_record(cls, row):
         from log_collector.schema import AnyLoggerSchema
         fn_data = f"{row}"
-
         save = True
+
         try:
             row = AnyLoggerSchema(**row).dict()     
         except Exception as error:
@@ -40,14 +43,18 @@ class AnyLogger(models.Model):
             if DEBUG:
                 sprint(error, c="red", p=1)
 
-            exc_info = traceback.format_exception(error)
-            exc_info = "\n".join(exc_info)
-            collector_exception = CollectorException() 
-            collector_exception.fn_name = sprint("schema error", s=1)
-            collector_exception.fn_data = fn_data
-            collector_exception.exc_info = exc_info
-            collector_exception.save()         
-            save = False
+            if TEST:
+                raise Exception("AnyLogger schema error")
+            
+            if PROD:
+                exc_info = traceback.format_exception(error)
+                exc_info = "\n".join(exc_info)
+                collector_exception = CollectorException() 
+                collector_exception.fn_name = sprint("schema error", s=1)
+                collector_exception.fn_data = fn_data
+                collector_exception.exc_info = exc_info
+                collector_exception.save()         
+                save = False
 
         if save:
             record = AnyLogger()
@@ -60,19 +67,29 @@ class AnyLogger(models.Model):
 
                 if ALERTS:
                     __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
-                    
+                
+                if DEBUG:
+                    sprint("OK", c="green", p=1)
+
+                if TEST:
+                    print("OK")
+
             except Exception as error:
 
                 if DEBUG:
                     sprint(error, c="red", p=1)
+                
+                if TEST:
+                    raise Exception("AnyLogger save error")               
 
-                exc_info = traceback.format_exception(error)
-                exc_info = "\n".join(exc_info)
-                collector_exception = CollectorException() 
-                collector_exception.fn_name = sprint("model save error", s=1)
-                collector_exception.fn_data = fn_data
-                collector_exception.exc_info = exc_info
-                collector_exception.save()   
+                if PROD:
+                    exc_info = traceback.format_exception(error)
+                    exc_info = "\n".join(exc_info)
+                    collector_exception = CollectorException() 
+                    collector_exception.fn_name = sprint("model save error", s=1)
+                    collector_exception.fn_data = fn_data
+                    collector_exception.exc_info = exc_info
+                    collector_exception.save()   
 
     @classmethod
     def check_stat_size(
@@ -146,8 +163,8 @@ class DjangoLogger(models.Model):
         from log_collector.schema import DjangoLoggerSchema
         fn_data = f"{row}"
         payload = row["payload"]
-
         save = True
+
         try:
             payload = DjangoLoggerSchema(**payload).dict()     
         except Exception as error:  
@@ -155,20 +172,28 @@ class DjangoLogger(models.Model):
             if DEBUG:
                 sprint(error, c="red", p=1)    
 
-            exc_info = traceback.format_exception(error)
-            exc_info = "\n".join(exc_info)
-            collector_exception = CollectorException() 
-            collector_exception.fn_name = sprint("schema error", s=1)
-            collector_exception.fn_data = fn_data
-            collector_exception.exc_info = exc_info
-            collector_exception.save()         
-            save = False
+            if TEST:
+                raise Exception("DjangoLogger schema error")                
+
+            if PROD:
+                exc_info = traceback.format_exception(error)
+                exc_info = "\n".join(exc_info)
+                collector_exception = CollectorException() 
+                collector_exception.fn_name = sprint("schema error", s=1)
+                collector_exception.fn_data = fn_data
+                collector_exception.exc_info = exc_info
+                collector_exception.save()         
+                save = False
 
         if save:
             record_check = DjangoLogger.objects.filter(exc_hash=payload["exc_hash"]).first()
             if record_check:
                 record_check.errors_count += 1
                 record_check.save()
+
+                if record_check.errors_count % 50 == 0 and ALERTS:
+                    __upserver__.any_throw(model_to_dict(record_check), routing_key="alerts")
+
             else:
                 record = DjangoLogger()
                 for field in cls._meta.fields:             
@@ -181,18 +206,28 @@ class DjangoLogger(models.Model):
                     if ALERTS:
                         __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
 
+                    if TEST:
+                        print("OK")
+
+                    if DEBUG:
+                        sprint("OK", c="green", p=1)
+
                 except Exception as error:
 
                     if DEBUG:
                         sprint(error, c="red", p=1)                   
 
-                    exc_info = traceback.format_exception(error)
-                    exc_info = "\n".join(exc_info)
-                    collector_exception = CollectorException()                    
-                    collector_exception.fn_name = sprint("model save error", s=1)
-                    collector_exception.fn_data = fn_data
-                    collector_exception.exc_info = exc_info
-                    collector_exception.save()   
+                    if TEST:
+                        raise Exception("DjangoLogger save error")
+                    
+                    if PROD:
+                        exc_info = traceback.format_exception(error)
+                        exc_info = "\n".join(exc_info)
+                        collector_exception = CollectorException()                    
+                        collector_exception.fn_name = sprint("model save error", s=1)
+                        collector_exception.fn_data = fn_data
+                        collector_exception.exc_info = exc_info
+                        collector_exception.save()   
 
     @classmethod
     def check_stat_size(
@@ -237,6 +272,7 @@ class DjangoException(models.Model):
         fn_data = f"{row}"
         payload = row["payload"]
         save = True
+
         try:
             payload = DjangoExceptionSchema(**payload).dict()     
         except Exception as error:  
@@ -244,20 +280,27 @@ class DjangoException(models.Model):
             if DEBUG:
                 sprint(error, c="red", p=1)    
 
-            exc_info = traceback.format_exception(error)
-            exc_info = "\n".join(exc_info)
-            collector_exception = CollectorException() 
-            collector_exception.fn_name = sprint("schema error", s=1)
-            collector_exception.fn_data = fn_data
-            collector_exception.exc_info = exc_info
-            collector_exception.save()         
-            save = False
+            if TEST:
+                raise Exception("DjangoException schema error")    
+            
+            if PROD:
+                exc_info = traceback.format_exception(error)
+                exc_info = "\n".join(exc_info)
+                collector_exception = CollectorException() 
+                collector_exception.fn_name = sprint("schema error", s=1)
+                collector_exception.fn_data = fn_data
+                collector_exception.exc_info = exc_info
+                collector_exception.save()         
+                save = False
 
         if save:
             record_check = DjangoException.objects.filter(exc_hash=payload["exc_hash"]).first()
             if record_check:
                 record_check.errors_count += 1
                 record_check.save()
+
+                if record_check.errors_count % 50 == 0 and ALERTS:
+                    __upserver__.any_throw(model_to_dict(record_check), routing_key="alerts")
 
             else:
 
@@ -272,18 +315,28 @@ class DjangoException(models.Model):
                     if ALERTS:
                         __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
 
+                    if DEBUG:
+                        sprint("OK", c="green", p=1)  
+
+                    if TEST:
+                        print("OK")
+
                 except Exception as error:
 
                     if DEBUG:
-                        sprint(error, c="red", p=1)             
+                        sprint(error, c="red", p=1)      
 
-                    exc_info = traceback.format_exception(error)
-                    exc_info = "\n".join(exc_info)
-                    collector_exception = CollectorException()                    
-                    collector_exception.fn_name = sprint("model save error", s=1)
-                    collector_exception.fn_data = fn_data
-                    collector_exception.exc_info = exc_info
-                    collector_exception.save()   
+                    if TEST:
+                        raise Exception("DjangoException save error") 
+
+                    if PROD:       
+                        exc_info = traceback.format_exception(error)
+                        exc_info = "\n".join(exc_info)
+                        collector_exception = CollectorException()                    
+                        collector_exception.fn_name = sprint("model save error", s=1)
+                        collector_exception.fn_data = fn_data
+                        collector_exception.exc_info = exc_info
+                        collector_exception.save()   
             
     @classmethod
     def check_stat_size(
@@ -317,19 +370,19 @@ class NginxLogger(models.Model):
         PUT = "PUT", "PUT"
         DELETE = "DELETE", "DELETE"
     
-    request_id = models.CharField(max_length=255)
-    request_timestamp = models.DateTimeField()
+    request_id = models.CharField(max_length=255, null=True, blank=True)
+    request_timestamp = models.DateTimeField(null=True, blank=True)
     remote_user = models.CharField(max_length=255, null=True, blank=True)
-    remote_addr = models.CharField(max_length=255)
+    remote_addr = models.CharField(max_length=255, null=True, blank=True)
     scheme = models.CharField(max_length=24, choices=Scheme.choices, default=Scheme.UNKNOWN)
-    host = models.CharField(max_length=255)
-    server_addr = models.CharField(max_length=255)
+    host = models.CharField(max_length=255, null=True, blank=True)
+    server_addr = models.CharField(max_length=255, null=True, blank=True)
     request_method = models.CharField(max_length=24, choices=RequestMethod.choices, default=RequestMethod.UNKNOWN)
-    request_uri = models.CharField(max_length=255)
-    request_length = models.PositiveIntegerField()
-    request_time = models.FloatField()
-    status = models.PositiveIntegerField()
-    body_bytes_sent = models.PositiveIntegerField()
+    request_uri = models.CharField(max_length=255, null=True, blank=True)
+    request_length = models.PositiveIntegerField(null=True)
+    request_time = models.FloatField(null=True)
+    status_code = models.PositiveIntegerField(null=True)
+    body_bytes_sent = models.PositiveIntegerField(null=True)
     upstream_addr = models.CharField(max_length=255, null=True, blank=True)
     upstream_connect_time = models.FloatField(null=True)
     upstream_header_time = models.FloatField(null=True)
@@ -341,6 +394,51 @@ class NginxLogger(models.Model):
 
     def __str__(self):
         return f"{self.request_id}"
+
+    @classmethod
+    def save_records(cls, f_binary):    
+        try:
+            rows = []
+            records_count = 0
+            for counter, line in enumerate(parse_nginx_log(f_binary)):
+                rows.append(line)
+                if counter % 100 == 0:
+
+                    if DEBUG:
+                        sprint("100 OK", c="green", p=1)   
+                    
+                    NginxLogger.objects.bulk_create([NginxLogger(**row) for row in rows])
+                    rows = []
+                records_count += 1
+
+            # write last
+            NginxLogger.objects.bulk_create([NginxLogger(**row) for row in rows])
+
+            if ALERTS:
+                __upserver__.any_throw({"success": f"Nginx parsed [ OK ] Records created {records_count}"}, routing_key="alerts")
+
+            if TEST:
+                print("OK")
+
+            if DEBUG:
+                sprint("OK", c="green", p=1)
+
+        except Exception as error:
+
+            if DEBUG:
+                sprint(error, c="red", p=1)                   
+
+            if TEST:
+                raise Exception("NginxLogger error")
+            
+            if PROD:
+                exc_info = traceback.format_exception(error)
+                exc_info = "\n".join(exc_info)
+                collector_exception = CollectorException()                    
+                collector_exception.fn_name = sprint("model save error", s=1)
+                collector_exception.fn_data = "nginx_file"
+                collector_exception.exc_info = exc_info
+                collector_exception.save()   
 
     @classmethod
     def check_stat_size(
@@ -367,18 +465,6 @@ class CollectorException(models.Model):
     def __str__(self):
         return f"{self.fn_name}"
 
-    @staticmethod
-    def format_exception(ei) -> str:
-        sio = io.StringIO()
-        tb = ei[2]
-        traceback.print_exception(ei[0], ei[1], tb, None, sio)
-        s = sio.getvalue()
-        sio.close()
-        if s[-1:] == "\n":
-            s = s[:-1]
-        return s
-
-
     @classmethod
     def check_stat_size(
         cls,
@@ -392,3 +478,27 @@ class CollectorException(models.Model):
             CollectorException.objects.all().delete()
 
 post_save.connect(CollectorException.check_stat_size, sender=CollectorException)
+
+
+
+class CronScheduler(models.Model):
+    task_name = models.CharField(max_length=255) 
+    messages_count = models.TextField(null=True, blank=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.fn_name}"
+
+    @classmethod
+    def check_stat_size(
+        cls,
+        sender,
+        instance,
+        created,
+        *args,
+        **kwargs
+    ):
+        if created and (instance.id % LOG_SIZE == 0):
+            CollectorException.objects.all().delete()
+
+post_save.connect(CronScheduler.check_stat_size, sender=CronScheduler)

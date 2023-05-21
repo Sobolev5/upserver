@@ -1,4 +1,4 @@
-from log_collector.models import AnyLogger, DjangoLogger, DjangoException, NginxLogger
+from log_collector.models import AnyLogger, DjangoLogger, DjangoException
 from ninja import ModelSchema
 
 
@@ -19,8 +19,3 @@ class DjangoExceptionSchema(ModelSchema):
         model = DjangoException
         model_exclude = ['id', 'assigned_to', 'status', 'errors_count',  'creation_date']
 
-
-class NginxLogger(ModelSchema):
-    class Config:
-        model = NginxLogger
-        model_exclude = ['id', 'creation_date']

@@ -1,3 +1,4 @@
+# PUT THIS FILE TO DJANGO ROOT FOLDER 
 import datetime
 import hashlib
 import io
@@ -12,6 +13,7 @@ from settings import DEBUG
 
 UPSERVER_AMQP_URI = f"amqp://admin:admin@127.0.0.1:5672/vhost" 
 DJANGO_LOGGER_REQUEST_EXTRA = "profile_id"
+
 
 """
 Django example:
