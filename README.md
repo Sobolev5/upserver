@@ -74,17 +74,7 @@ http://YOU_SERVER_IP:12345 # Here you can log in with ADMIN_USER and ADMIN_PASSW
 ## Commands
 Start/stop `upserver`:
 ```sh
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
-```
-
-Start/stop `upserver` in dev mode: 
-```sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up  up --build -d
-```
-
-Run tests: 
-```sh
-docker compose -f docker-compose.yml -f docker-compose.test.yml up  up --build -d
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile app up --build -d
 ```
 
 Get shell:

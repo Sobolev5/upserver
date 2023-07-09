@@ -1,4 +1,4 @@
-FROM python:3.11.2-buster 
+FROM python:3.11.2-buster as base 
 LABEL Sobolev Andrey
 ENV PYTHONUNBUFFERED 1
 
@@ -26,6 +26,11 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 COPY . .
 
+FROM base as prod
 CMD gunicorn --bind 0.0.0.0:12345 --threads 2 --workers 5 --reload wsgi
 
+FROM base as dev
+CMD python manage.py runserver 0.0.0.0:12345
 
+FROM base as test
+CMD pytest

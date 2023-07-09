@@ -1,10 +1,10 @@
 import traceback
+from logger import logger
 from simple_print import sprint
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
-from ninja import ModelSchema
 from settings import LOG_SIZE
 from settings import ALERTS
 from settings import DEBUG
@@ -33,6 +33,8 @@ class AnyLogger(models.Model):
     @classmethod
     def save_record(cls, row):
         from log_collector.schema import AnyLoggerSchema
+        logger.info(AnyLogger.save_record.__qualname__)
+
         fn_data = f"{row}"
         save = True
 
@@ -56,6 +58,9 @@ class AnyLogger(models.Model):
                 collector_exception.save()         
                 save = False
 
+            if ALERTS:
+                __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts") 
+
         if save:
             record = AnyLogger()
             for field in cls._meta.fields:             
@@ -72,7 +77,7 @@ class AnyLogger(models.Model):
                     sprint("OK", c="green", p=1)
 
                 if TEST:
-                    print("OK")
+                    logger.info("OK")
 
             except Exception as error:
 
@@ -90,6 +95,9 @@ class AnyLogger(models.Model):
                     collector_exception.fn_data = fn_data
                     collector_exception.exc_info = exc_info
                     collector_exception.save()   
+
+                if ALERTS:
+                    __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts")
 
     @classmethod
     def check_stat_size(
@@ -185,6 +193,9 @@ class DjangoLogger(models.Model):
                 collector_exception.save()         
                 save = False
 
+            if ALERTS:
+                __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts")    
+
         if save:
             record_check = DjangoLogger.objects.filter(exc_hash=payload["exc_hash"]).first()
             if record_check:
@@ -207,7 +218,7 @@ class DjangoLogger(models.Model):
                         __upserver__.any_throw(model_to_dict(record), routing_key="alerts")
 
                     if TEST:
-                        print("OK")
+                        logger.info("OK")
 
                     if DEBUG:
                         sprint("OK", c="green", p=1)
@@ -228,6 +239,9 @@ class DjangoLogger(models.Model):
                         collector_exception.fn_data = fn_data
                         collector_exception.exc_info = exc_info
                         collector_exception.save()   
+
+                    if ALERTS:
+                        __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts")                         
 
     @classmethod
     def check_stat_size(
@@ -262,7 +276,6 @@ class DjangoException(models.Model):
     message = models.CharField(max_length=5000, null=True, blank=True) 
     creation_date = models.DateTimeField(auto_now_add=True)
 
-
     def __str__(self):
         return f"{self.message}"
 
@@ -293,6 +306,9 @@ class DjangoException(models.Model):
                 collector_exception.save()         
                 save = False
 
+            if ALERTS:
+                __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts") 
+
         if save:
             record_check = DjangoException.objects.filter(exc_hash=payload["exc_hash"]).first()
             if record_check:
@@ -319,7 +335,7 @@ class DjangoException(models.Model):
                         sprint("OK", c="green", p=1)  
 
                     if TEST:
-                        print("OK")
+                        logger.info("OK")
 
                 except Exception as error:
 
@@ -337,7 +353,10 @@ class DjangoException(models.Model):
                         collector_exception.fn_data = fn_data
                         collector_exception.exc_info = exc_info
                         collector_exception.save()   
-            
+
+                    if ALERTS:
+                        __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts")
+
     @classmethod
     def check_stat_size(
         cls,
@@ -414,14 +433,14 @@ class NginxLogger(models.Model):
             # write last
             NginxLogger.objects.bulk_create([NginxLogger(**row) for row in rows])
 
-            if ALERTS:
-                __upserver__.any_throw({"success": f"Nginx parsed [ OK ] Records created {records_count}"}, routing_key="alerts")
-
             if TEST:
-                print("OK")
+                logger.info("OK")
 
             if DEBUG:
                 sprint("OK", c="green", p=1)
+
+            if ALERTS:
+                __upserver__.any_throw({"success": f"Nginx parsed [ OK ] Records created {records_count}"}, routing_key="alerts")                
 
         except Exception as error:
 
@@ -440,6 +459,9 @@ class NginxLogger(models.Model):
                 collector_exception.exc_info = exc_info
                 collector_exception.save()   
 
+            if ALERTS:
+                __upserver__.any_throw({"error": sprint(error, s=1)}, routing_key="alerts") 
+
     @classmethod
     def check_stat_size(
         cls,
@@ -455,8 +477,8 @@ class NginxLogger(models.Model):
 post_save.connect(NginxLogger.check_stat_size, sender=NginxLogger)
 
 
-
 class CollectorException(models.Model):
+    """ Collect Upserver exceptions in separate table. """
     fn_name = models.CharField(max_length=255) 
     fn_data = models.TextField(null=True, blank=True)
     exc_info = models.TextField()
@@ -478,7 +500,6 @@ class CollectorException(models.Model):
             CollectorException.objects.all().delete()
 
 post_save.connect(CollectorException.check_stat_size, sender=CollectorException)
-
 
 
 class CronScheduler(models.Model):

@@ -13,7 +13,6 @@ from simple_print import sprint
 
 
 class Tasks:
-
     def apply_cron_like_time(cron_time):
         """
         apply fn.cron_time
@@ -39,9 +38,9 @@ class Tasks:
                 sprint(row, c="green", i=8)
             models.AnyLogger.save_record(row=row)
             
-
         if messages_count > 0 and PROD:
-            models.CronScheduler.create(task_name="catch_any_logger", messages_count=messages_count)
+            cron_scheduler = models.CronScheduler()
+            cron_scheduler.create(task_name="catch_any_logger", messages_count=messages_count)
 
     @apply_cron_like_time("* * * * *")
     def catch_django_logger():
@@ -57,7 +56,8 @@ class Tasks:
             messages_count += 1
 
         if messages_count > 0 and PROD:
-            models.CronScheduler.create(task_name="catch_django_logger", messages_count=messages_count)
+            cron_scheduler = models.CronScheduler()
+            cron_scheduler.create(task_name="catch_django_logger", messages_count=messages_count)
 
     @apply_cron_like_time("* * * * *")
     def catch_django_exception():
@@ -73,7 +73,8 @@ class Tasks:
             messages_count += 1
 
         if messages_count > 0 and PROD:
-            models.CronScheduler.create(task_name="catch_django_exception", messages_count=messages_count)
+            cron_scheduler = models.CronScheduler()
+            cron_scheduler.create(task_name="catch_django_exception", messages_count=messages_count)
             
     @apply_cron_like_time("45 23 * * *")
     def catch_nginx_logger():
@@ -89,7 +90,8 @@ class Tasks:
                 messages_count += 1
 
         if messages_count > 0 and PROD:
-            models.CronScheduler.create(task_name="catch_nginx_logger", messages_count=messages_count)
+            cron_scheduler = models.CronScheduler()
+            cron_scheduler.create(task_name="catch_nginx_logger", messages_count=messages_count)
 
 
 def run_every_minute():

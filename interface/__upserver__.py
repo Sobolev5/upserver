@@ -4,6 +4,6 @@ from settings import DEBUG
 from simple_print import sprint
 
 
-def any_throw(payload, ttl=180, routing_key="any_logger") -> None:
+def any_throw(payload, ttl=1800, routing_key="any_logger") -> None:
     """ttl 0 without deletion time"""
-    throw(payload=payload, uri=AMQP_URI, routing_key="alerts", ttl=ttl) 
+    throw(payload=payload, uri=AMQP_URI, routing_key=routing_key, ttl=ttl) 

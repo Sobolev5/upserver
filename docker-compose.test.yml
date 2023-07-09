@@ -5,9 +5,11 @@ services:
   upserver-interface:
     environment:
       TEST: 1
-    cmd: [ "pytest" ]
+    build: 
+      target: test
 
   upserver-alerts: 
     environment:
       TEST: 1
-    cmd: [ "pytest" ]
+    build: 
+      target: test
