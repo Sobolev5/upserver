@@ -4,9 +4,13 @@ services:
   upserver-interface:
     environment:
       PROD: 1
+    build: 
+      target: prod
     restart: always 
 
   upserver-alerts:
     environment:
       PROD: 1
+    build: 
+      target: prod      
     restart: always

@@ -1,7 +1,6 @@
 from starlette.applications import Starlette
 from starlette.responses import PlainTextResponse
 from starlette.routing import Route
-from settings import DEBUG
 
 
 async def health(request):
@@ -14,7 +13,6 @@ class AmqpHttpServer(Starlette):
 
 
 app = AmqpHttpServer(
-    debug=DEBUG,
     routes=[
         Route("/", health),
     ],

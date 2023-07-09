@@ -3,37 +3,39 @@ version: '3.2'
 services:
 
   upserver-postgres:
-    container_name: upserver-postgres
+    image: "postgres:15.2"
+    container_name: upserver-postgres 
+    profiles: [ "all", "stack" ]
     env_file: .env
-    image: 'postgres:15.2'
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
       POSTGRES_DB: ${POSTGRES_DB:-db}
       PGDATA: /data/pgdata
+    ports:
+      - 55432:5432
+    expose:
+      - 5432
     volumes:
       - upserver-postgres-volume:/data/pgdata
-    ports:
-      - "55432:5432"
-    expose:
-      - "5432"
     restart: unless-stopped
     networks:
       - upserver-network
 
   upserver-rabbitmq:
+    image: "rabbitmq:3.11.4-management"
     container_name: upserver-rabbitmq
+    profiles: [ "all", "stack" ]
     env_file: .env
-    image: 'rabbitmq:3.11.4-management'
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin}
       RABBITMQ_DEFAULT_VHOST: vhost
-    expose:
-      - "5672" 
     ports:
-      - '55672:5672'
-      - '51567:15672'   
+      - 55672:5672
+      - 51567:15672        
+    expose:
+      - 5672 
     volumes:
       - upserver-rabbitmq-volume:/var/lib/rabbitmq/mnesia/
     restart: unless-stopped
@@ -41,11 +43,12 @@ services:
       - upserver-network 
 
   upserver-interface:
-    container_name: upserver-interface
-    env_file: .env
+    container_name: upserver-interface 
+    profiles: [ "all", "app" ]
     build: 
       context: ./interface/
       dockerfile: Dockerfile 
+    env_file: .env
     environment:
       DEBUG: ${DEBUG:-1}
       POSTGRES_USER: ${POSTGRES_USER:-admin}
@@ -59,22 +62,23 @@ services:
       RABBITMQ_HOST: ${RABBITMQ_HOST:-upserver-rabbitmq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}        
-    restart: unless-stopped 
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}           
     depends_on: 
       - upserver-postgres 
       - upserver-rabbitmq 
     ports:
-      - "12345:12345"
+      - 12345:12345
+    restart: unless-stopped 
     networks:
       - upserver-network   
 
   upserver-alerts:
-    container_name: upserver-alerts
-    env_file: .env
+    container_name: upserver-alerts 
+    profiles: [ "all", "app" ]
     build: 
       context: ./alerts/
       dockerfile: Dockerfile 
+    env_file: .env
     environment:
       DEBUG: ${DEBUG:-1}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-upserver-rabbitmq}
@@ -82,7 +86,9 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin}   
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   
-      TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}       
+      TELEGRAM_CHAT_IDS: ${TELEGRAM_CHAT_IDS}   
+    ports:
+      - 12346:12346          
     depends_on: 
       - upserver-rabbitmq 
     networks:
@@ -90,6 +96,7 @@ services:
 
   upserver-monitoring:
     container_name: upserver-monitoring
+    profiles: [ "all", "app" ]
     build: 
       context: ./monitoring/
       dockerfile: Dockerfile  

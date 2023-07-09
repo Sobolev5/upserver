@@ -7,6 +7,8 @@ from log_collector.models import AnyLogger
 from log_collector.models import NginxLogger
 from log_collector.models import CollectorException
 from monitoring.models import Monitor
+from monitoring.models import MonitorActivity
+from monitoring.models import RestoreActivity
 from mixer.backend.django import mixer
 
 
@@ -32,6 +34,14 @@ def clear_logs() -> None:
     CollectorException.objects.all().delete()
     sprint("db_tasks.clear_logs -> complete", c="green")
     
+
+def clear_monitoring() -> None:
+    # python run.py db_tasks "clear_monitoring()"
+
+    MonitorActivity.objects.all().delete()
+    RestoreActivity.objects.all().delete()
+    sprint("db_tasks.clear_monitoring -> complete", c="green")
+
 
 def initial() -> None:
     # python run.py db_tasks "prepare()"

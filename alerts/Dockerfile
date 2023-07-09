@@ -1,4 +1,4 @@
-FROM python:3.11.2-buster
+FROM python:3.11.2-buster as base
 LABEL Sobolev Andrey
 ENV PYTHONUNBUFFERED 1
 
@@ -27,5 +27,11 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 COPY . .
 
-CMD uvicorn app:app --host 0.0.0.0 
+FROM base as prod
+CMD uvicorn app:app --host 0.0.0.0 --port 12346
 
+FROM base as dev
+CMD uvicorn app:app --host 0.0.0.0 --port 12346 --reload
+
+FROM base as test
+CMD pytest
