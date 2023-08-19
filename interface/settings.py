@@ -23,15 +23,15 @@ RABBITMQ_USER = os.getenv("RABBITMQ_USER")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 AMQP_URI = f"amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/vhost"
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_IDS = []
-
-
 try:
     if TELEGRAM_BOT_TOKEN: 
         TELEGRAM_CHAT_IDS = [int(x) for x in os.getenv("TELEGRAM_CHAT_IDS").split(",")]
 except:
     pass
-
+try:
+    CSRF_TRUSTED_ORIGINS = [str(x) for x in os.getenv("CSRF_TRUSTED_ORIGINS").split(',')]
+except:
+    CSRF_TRUSTED_ORIGINS = []   
 try:
     LOG_SIZE = int(os.getenv("LOG_SIZE"))
 except:
@@ -159,5 +159,4 @@ LOGGING = {
         },
     }
 }
-
 

@@ -1,13 +1,13 @@
 import pytest
-import logging
-from pathlib import Path
+import os
+import gzip
 from log_collector.models import AnyLogger, DjangoLogger, \
                                  DjangoException, NginxLogger
 
 
 @pytest.mark.django_db
 def test_catch_any_logger():
-    # pytest tests/tests.py::test_catch_any_logger -rP
+    # docker exec upserver-interface pytest tests/tests.py::test_catch_any_logger -rP
     
     row = {'payload': {'hello': 'world'}, 
             'tag': 'throwed', 
@@ -24,7 +24,7 @@ def test_catch_any_logger():
  
 @pytest.mark.django_db
 def test_django_logger():
-    # pytest tests/tests.py::test_django_logger -rP
+    # docker exec upserver-interface pytest tests/tests.py::test_django_logger -rP
 
     row = {
         "payload":{
@@ -79,7 +79,7 @@ def test_django_logger():
 
 @pytest.mark.django_db
 def test_django_exception():
-    # pytest tests/tests.py::test_django_exception -rP
+    # docker exec upserver-interface pytest tests/tests.py::test_django_exception -rP
 
     row = {
         "payload":{
@@ -101,24 +101,25 @@ def test_django_exception():
     DjangoException.save_record(row=row)
 
 
-@pytest.mark.skip
 @pytest.mark.django_db
-def test_parse_nginx_logger(caplog):
-    # pytest tests/tests.py::test_parse_nginx_logger -rP
-    # TODO in progress
+def test_parse_nginx_logger():
+    # docker exec upserver-interface pytest tests/tests.py::test_parse_nginx_logger -rP
+    # python run.py tests.tests "test_parse_nginx_logger()"
 
-    NGINX_LOG_DIR = Path(__file__).resolve() + "nginx/"
+    NGINX_LOG_DIR = os.path.dirname(os.path.realpath(__file__)) + "/nginx/"
 
     for f_name in ["access", "error"]:
-
+        f_path = f"{NGINX_LOG_DIR}{f_name}.log.gz"
+        f_binary = None
         try:
-            fp = open(f"{NGINX_LOG_DIR}{f_name}log", "rb")
-            f_binary = fp.read()
-            fp.close()
+            f_open = gzip.open(f_path, mode="rb")
+            f_binary = f_open.read()
+            f_open.close()
+            NginxLogger.save_records(f_binary)
         except FileNotFoundError:
-            print("Please check the path.")
-
-        NginxLogger.save_records(f_binary)
+            print("Please check the path.")     
+        except Exception as e:
+            print(e)
 
 
 

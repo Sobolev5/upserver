@@ -30,7 +30,8 @@ FROM base as prod
 CMD gunicorn --bind 0.0.0.0:12345 --threads 2 --workers 5 --reload wsgi
 
 FROM base as dev
-CMD python manage.py runserver 0.0.0.0:12345
+ENTRYPOINT ["tail", "-f", "/dev/null"]
+# CMD python manage.py runserver 0.0.0.0:12345
 
 FROM base as test
 CMD pytest

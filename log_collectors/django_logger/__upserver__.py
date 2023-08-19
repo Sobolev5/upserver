@@ -64,13 +64,18 @@ def process_record(record: logging.LogRecord = "") -> None:
     if exc_info:
         exc_info = format_exception(exc_info)   
 
+    if hasattr(request.user, "id") and request.user.id:
+        user_id = request.user.id
+    else:
+        user_id = ""
+
     payload = {}
     payload["uuid"] = shortuuid.uuid()
     payload["asctime"] = datetime.datetime.now()
     payload["exc_info"] = exc_info 
     payload["exc_hash"] = hashlib.md5(exc_info.encode()).hexdigest()
     payload["user"] = str(request.user)
-    payload["user_id"] = request.user.id
+    payload["user_id"] = user_id
     payload["request_extra"] = str(getattr(request, DJANGO_LOGGER_REQUEST_EXTRA, ""))
     payload["site"] = f"{request.get_host()}:{request.get_port()}"
     payload["scheme"] = str(request.scheme) 
@@ -127,5 +132,5 @@ class LoggerHandler(logging.StreamHandler):
             try:
                 process_record(record)
             except Exception as e:
-                logging.exception(f"{e}")
+                logging.exception(str(e))
 
