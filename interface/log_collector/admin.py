@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from log_collector.models import DjangoLogger, DjangoException, \
                                  AnyLogger, NginxLogger, \
-                                 CollectorException, CronScheduler  
+                                 CollectorException, TaskScheduler  
 
 
 class AnyLoggerAdmin(admin.ModelAdmin):
@@ -41,7 +41,9 @@ class CollectorExceptionAdmin(admin.ModelAdmin):
 admin.site.register(CollectorException, CollectorExceptionAdmin)
 
 
-class CronSchedulerAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in CronScheduler._meta.fields]
-    search_fields = [f.name for f in CronScheduler._meta.fields if not isinstance(f, models.ForeignKey)]
-admin.site.register(CronScheduler, CronSchedulerAdmin)
+class TaskSchedulerAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in TaskScheduler._meta.fields]
+    list_filter = ("task_name", "task_cron_time", "task_active", "task_completed")
+    search_fields = [f.name for f in TaskScheduler._meta.fields if not isinstance(f, models.ForeignKey)]
+admin.site.register(TaskScheduler, TaskSchedulerAdmin)
+

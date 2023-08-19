@@ -6,6 +6,7 @@ from log_collector.models import DjangoException
 from log_collector.models import AnyLogger
 from log_collector.models import NginxLogger
 from log_collector.models import CollectorException
+from log_collector.models import TaskScheduler
 from monitoring.models import Monitor
 from monitoring.models import MonitorActivity
 from monitoring.models import RestoreActivity
@@ -32,16 +33,11 @@ def clear_logs() -> None:
     AnyLogger.objects.all().delete()
     NginxLogger.objects.all().delete()
     CollectorException.objects.all().delete()
-    sprint("db_tasks.clear_logs -> complete", c="green")
-    
-
-def clear_monitoring() -> None:
-    # python run.py db_tasks "clear_monitoring()"
-
+    TaskScheduler.objects.all().delete()
     MonitorActivity.objects.all().delete()
     RestoreActivity.objects.all().delete()
-    sprint("db_tasks.clear_monitoring -> complete", c="green")
-
+    sprint("db_tasks.clear_logs -> complete", c="green")
+    
 
 def initial() -> None:
     # python run.py db_tasks "prepare()"
