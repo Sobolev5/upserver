@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 import json
-from simple_print import sprint
 from throw_catch import catch
 from settings import AMQP_URI
 from settings import TELEGRAM_BOT_TOKEN
@@ -22,8 +21,6 @@ class Messager:
             count=10,
         ):
             payload = catched_message["payload"]
-
-            sprint(f"{payload=}", c="green")
             payload = json.dumps(
                 payload,
                 indent=2,
