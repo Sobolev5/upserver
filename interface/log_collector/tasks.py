@@ -59,7 +59,6 @@ def task_decorator(cron_time):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*a, **kw):
-
             task_name = fn.__name__
             datetime_now = datetime.datetime.now()
             current_thread = threading.current_thread()
@@ -67,16 +66,23 @@ def task_decorator(cron_time):
                 f"Task {task_name} start in thread [ <green>{current_thread}</green> ]"
             )
 
-            if models.TaskScheduler.objects.filter(
-                task_name=task_name,
-                task_active=True).count() > 0:
+            if (
+                models.TaskScheduler.objects.filter(
+                    task_name=task_name, task_active=True
+                ).count()
+                > 0
+            ):
                 if DEBUG:
-                    logger.opt(colors=True).info(f"Tasks.{task_name} [ <red>ALREADY WORKED</red> ]")
+                    logger.opt(colors=True).info(
+                        f"Tasks.{task_name} [ <red>ALREADY WORKED</red> ]"
+                    )
 
                 return None
 
             if DEBUG:
-                logger.opt(colors=True).info(f"Tasks.{task_name} [ <green>START</green> ]")
+                logger.opt(colors=True).info(
+                    f"Tasks.{task_name} [ <green>START</green> ]"
+                )
 
             time_start = time.process_time()
             task_stdout = f"{task_name} start {datetime_now}\n"
@@ -115,16 +121,20 @@ def task_decorator(cron_time):
                 t.save()
 
                 if DEBUG:
-                    logger.opt(colors=True).info(f"Tasks.{task_name} [ <red>FAIL</red> ]")
+                    logger.opt(colors=True).info(
+                        f"Tasks.{task_name} [ <red>FAIL</red> ]"
+                    )
                     pprint.pprint(task_error_tb)
                 return None
-            
+
             finally:
                 sys.stdout.close()
                 sys.stdout = stdout_backup
 
             if DEBUG:
-                logger.opt(colors=True).info(f"Tasks.{task_name} [ <green>FINISH</green> ]")
+                logger.opt(colors=True).info(
+                    f"Tasks.{task_name} [ <green>FINISH</green> ]"
+                )
 
             task_time = time.process_time() - time_start
             task_time = f"{round(task_time, 4)}"
@@ -135,7 +145,7 @@ def task_decorator(cron_time):
                 task_memory = ""
 
             task_stdout += f"\n{task_name} finish {datetime_now}\n"
-            t.task_active = False     
+            t.task_active = False
             t.task_completed = True
             t.task_time = task_time
             t.task_stdout = task_stdout
@@ -147,11 +157,11 @@ def task_decorator(cron_time):
 
         wrapper.cron_time = cron_time
         return wrapper
+
     return decorator
 
 
 class Tasks:
-
     @task_decorator("0 0 1 1 *")
     def task_test():
         # python run.py log_collector.tasks "run_every_minute(force_task='task_test')"
@@ -162,25 +172,24 @@ class Tasks:
     def task_any_logger():
         # python run.py log_collector.tasks "run_every_minute(force_task='task_any_logger')"
 
-        messages = catch(uri=AMQP_URI, queue="any_logger", count=1)    
+        messages = catch(uri=AMQP_URI, queue="any_logger", count=1)
         messages_count = 0
         for row in messages:
             if DEBUG:
                 sprint(row, c="green", i=8)
             models.AnyLogger.save_record(row=row)
-            messages_count += 1     
-        return messages_count   
-    
+            messages_count += 1
+        return messages_count
 
     @task_decorator("* * * * *")
     def task_django_logger():
         # python run.py log_collector.tasks "run_every_minute(force_task='task_django_logger')"
 
-        messages = catch(uri=AMQP_URI, queue="django_logger", count=1)    
+        messages = catch(uri=AMQP_URI, queue="django_logger", count=1)
         messages_count = 0
         for row in messages:
             if DEBUG:
-                sprint(row, c="green")            
+                sprint(row, c="green")
             models.DjangoLogger.save_record(row=row)
             messages_count += 1
         return messages_count
@@ -189,15 +198,15 @@ class Tasks:
     def task_django_exception():
         # python run.py log_collector.tasks "run_every_minute(force_task='task_django_exception')"
 
-        messages = catch(uri=AMQP_URI, queue="django_exception", count=1)    
-        messages_count = 0                     
+        messages = catch(uri=AMQP_URI, queue="django_exception", count=1)
+        messages_count = 0
         for row in messages:
             if DEBUG:
-                sprint(row, c="green")         
-            models.DjangoException.save_record(row=row)
-            messages_count += 1        
-        return messages_count    
+                sprint(row, c="green")
 
+            models.DjangoException.save_record(row=row)
+            messages_count += 1
+        return messages_count
 
     @task_decorator("* * * * *")
     def task_nginx_logger():
@@ -205,27 +214,25 @@ class Tasks:
 
         connection = pika.BlockingConnection(pika.URLParameters(AMQP_URI))
         channel = connection.channel()
-        queue = channel.queue_declare(queue="nginx_log_collector", durable=False)  
+        queue = channel.queue_declare(queue="nginx_log_collector", durable=False)
 
         messages_count = 0
         for _ in range(queue.method.message_count):
-
             method_frame, header_frame, f_binary = channel.basic_get(
-                queue="nginx_log_collector", 
-                auto_ack=True
+                queue="nginx_log_collector", auto_ack=True
             )
 
             if DEBUG:
                 sprint(
-                    f"Tasks.catch_nginx_logger() method_frame={method_frame}", 
-                    c="green", 
-                    i=4
-                ) 
+                    f"Tasks.catch_nginx_logger() method_frame={method_frame}",
+                    c="green",
+                    i=4,
+                )
 
             if method_frame:
                 models.NginxLogger.save_records(f_binary)
-                messages_count += 1        
-        return messages_count   
+                messages_count += 1
+        return messages_count
 
 
 def run_every_minute(force_task=None):
@@ -234,7 +241,9 @@ def run_every_minute(force_task=None):
     datetime_now = datetime.datetime.now()
     if DEBUG:
         sprint(f'tasks.tasks "run_every_minute() force_task={force_task}', c="yellow")
-    for fn_name, fn in filter(lambda x: x[0].startswith("task"), Tasks.__dict__.items()):
+    for fn_name, fn in filter(
+        lambda x: x[0].startswith("task"), Tasks.__dict__.items()
+    ):
         if force_task:
             if fn_name == force_task:
                 thread = threading.Thread(target=fn)
@@ -246,9 +255,9 @@ def run_every_minute(force_task=None):
                     thread.start()
 
 
-
 def show_all_environ():
     # python run.py log_collector.tasks "show_all_environ()"
     import os
+
     for name, value in os.environ.items():
         print("{0}: {1}".format(name, value))

@@ -1,10 +1,5 @@
 # Development commands
 
-Run tests: 
-```sh
-docker compose -f docker-compose.yml -f docker-compose.test.yml --profile app up 
-```
-
 Run commands `upserver.interface`: 
 ```sh
 docker exec upserver-interface python /interface/run.py db_tasks "clear_all()"
@@ -31,14 +26,13 @@ docker compose logs -f upserver-monitoring
 
 Start/stop `upserver` in dev mode: 
 ```sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile all up --build -d
-docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile all down
+docker compose up
 ```
 
 Start/stop `upserver` in production mode: 
 ```sh
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile all up --build -d
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile all down
+docker compose up --build -d
+docker compose down
 ```
 
  

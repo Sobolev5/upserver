@@ -24,14 +24,14 @@ def django_db_setup():
         "PASSWORD": POSTGRES_PASSWORD,
         "HOST": POSTGRES_HOST,
         "PORT": POSTGRES_PORT,
-        "ATOMIC_REQUESTS": False
+        "ATOMIC_REQUESTS": False,
     }
-  
-  
+
+
 # Helpers
 def extract_key_re(key: str, json_s: str) -> list:
-    regexp = re.compile(f'(?<=\"{key}\": \").+?(?=\")')
-    return [x for x in regexp.findall(json_s)] 
+    regexp = re.compile(f'(?<="{key}": ").+?(?=")')
+    return [x for x in regexp.findall(json_s)]
 
 
 def extract_key(obj: t.Union[dict, list], key: str) -> list:

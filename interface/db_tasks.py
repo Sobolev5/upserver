@@ -37,36 +37,38 @@ def clear_logs() -> None:
     MonitorActivity.objects.all().delete()
     RestoreActivity.objects.all().delete()
     sprint("db_tasks.clear_logs -> complete", c="green")
-    
+
 
 def initial() -> None:
     # python run.py db_tasks "prepare()"
 
     username = os.getenv("ADMIN_USER")
-    password = os.getenv("ADMIN_PASSWORD") 
+    password = os.getenv("ADMIN_PASSWORD")
 
     su_email = f"{username}@up.server"
     initialized = True
 
     try:
-       superuser = User.objects.get(email=su_email) 
+        superuser = User.objects.get(email=su_email)
     except:
-        superuser = User.objects.create_superuser(username=username, email=su_email, password=password)
+        superuser = User.objects.create_superuser(
+            username=username, email=su_email, password=password
+        )
         superuser.save()
         initialized = False
-    
-    if not initialized:
 
+    if not initialized:
         monitors_list = [
-            {"name": "httpbin.org",
-            "host": "httpbin.org",
-            "port": 443,
-            "su_host": "httpbin.org",
-            "su_port": 22,
-            "su_login": "root",
-            "su_password": "mypass",
-            "su_restore_commands": "cd /var/opt; ./restore",
-            "active": True
+            {
+                "name": "httpbin.org",
+                "host": "httpbin.org",
+                "port": 443,
+                "su_host": "httpbin.org",
+                "su_port": 22,
+                "su_login": "root",
+                "su_password": "mypass",
+                "su_restore_commands": "cd /var/opt; ./restore",
+                "active": True,
             }
         ]
 
@@ -88,7 +90,7 @@ def initial() -> None:
 
         for i in range(10):
             o = mixer.blend(NginxLogger)
-            o.save()    
+            o.save()
 
         sprint("db_tasks.initial -> complete", c="green")
     else:

@@ -5,7 +5,6 @@ services:
   upserver-postgres:
     image: "postgres:15.2"
     container_name: upserver-postgres 
-    profiles: [ "all", "stack" ]
     env_file: .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-admin}
@@ -25,7 +24,6 @@ services:
   upserver-rabbitmq:
     image: "rabbitmq:3.11.4-management"
     container_name: upserver-rabbitmq
-    profiles: [ "all", "stack" ]
     env_file: .env
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
@@ -44,7 +42,6 @@ services:
 
   upserver-interface:
     container_name: upserver-interface 
-    profiles: [ "all", "app" ]
     build: 
       context: ./interface/
       dockerfile: Dockerfile 
@@ -74,13 +71,11 @@ services:
 
   upserver-alerts:
     container_name: upserver-alerts 
-    profiles: [ "all", "app" ]
     build: 
       context: ./alerts/
       dockerfile: Dockerfile 
     env_file: .env
     environment:
-      DEBUG: ${DEBUG:-1}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-upserver-rabbitmq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
@@ -96,12 +91,10 @@ services:
 
   upserver-monitoring:
     container_name: upserver-monitoring
-    profiles: [ "all", "app" ]
     build: 
       context: ./monitoring/
       dockerfile: Dockerfile  
     environment:
-      DEBUG: ${DEBUG:-1}  
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-db}
