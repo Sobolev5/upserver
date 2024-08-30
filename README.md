@@ -1,6 +1,8 @@
 # Upserver 
 
-`upserver` it is a free monitoring tool with **repair** option.  
+`upserver` it is a free monitoring tool for Django project with **repair** option
+on bare metal servers.  
+
 You can specify the ip of your server, login and password.  
 If your server is unavailable, `upserver` will connect automatically  
 and execute restore commands.
@@ -10,7 +12,6 @@ and execute restore commands.
 Example of use:  
 - server monitoring    
 - uptime statistic  
-- log collectors
 - server down alerting 
    
 ## Install and run
@@ -60,7 +61,7 @@ docker exec upserver-interface python manage.py migrate
 docker exec upserver-interface python run.py db_tasks "initial()"
 ```
 
-Add cron scheduler:
+Add cron scheduler (bare metal):
 ```sh
 echo '* * * * * docker exec upserver-interface python /interface/run.py log_collector.tasks "run_every_minute()" &>/dev/null' >> /var/spool/cron/root 
 echo '* * * * * docker exec upserver-alerts python /alerts/run.py &>/dev/null' >> /var/spool/cron/root 

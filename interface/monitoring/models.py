@@ -26,18 +26,14 @@ class Monitor(models.Model):
         return f"{self.name} {self.host}:{self.port}"
 
     @classmethod
-    def change_commands_syntax(
-        cls,
-        sender,
-        instance,
-        created,
-        *args,
-        **kwargs
-    ):    
-        instance.su_restore_commands = ";".join([x.strip() for x in instance.su_restore_commands.split("\n")])
+    def change_commands_syntax(cls, sender, instance, created, *args, **kwargs):
+        instance.su_restore_commands = ";".join(
+            [x.strip() for x in instance.su_restore_commands.split("\n")]
+        )
         signals.post_save.disconnect(Monitor.change_commands_syntax, sender=Monitor)
         instance.save()
         signals.post_save.connect(Monitor.change_commands_syntax, sender=Monitor)
+
 
 signals.post_save.connect(Monitor.change_commands_syntax, sender=Monitor)
 
@@ -52,23 +48,18 @@ class MonitorActivity(models.Model):
         return f"{self.monitor} {self.server_response}"
 
     class Meta:
-        ordering  = ['-id']
+        ordering = ["-id"]
 
     def restore_hops(self):
         return self.monitor.restore_hops
-    restore_hops.admin_order_field  = 'monitor__restore_hops'
+
+    restore_hops.admin_order_field = "monitor__restore_hops"
 
     @classmethod
-    def check_stat_size(
-        cls,
-        sender,
-        instance,
-        created,
-        *args,
-        **kwargs
-    ):
+    def check_stat_size(cls, sender, instance, created, *args, **kwargs):
         if created and (instance.id % LOG_SIZE == 0):
             MonitorActivity.objects.all().delete()
+
 
 signals.post_save.connect(MonitorActivity.check_stat_size, sender=MonitorActivity)
 
@@ -83,32 +74,26 @@ class RestoreActivity(models.Model):
         return f"{self.monitor}"
 
     class Meta:
-        ordering  = ['-id']
+        ordering = ["-id"]
 
     @classmethod
-    def check_stat_size(
-        cls,
-        sender,
-        instance,
-        created,
-        *args,
-        **kwargs
-    ):
+    def check_stat_size(cls, sender, instance, created, *args, **kwargs):
         if created and (instance.id % LOG_SIZE == 0):
             RestoreActivity.objects.all().delete()
 
     @classmethod
-    def send_notify_to_telegram_bot(
-        cls,
-        sender,
-        instance,
-        created,
-        *args,
-        **kwargs
-    ):
+    def send_notify_to_telegram_bot(cls, sender, instance, created, *args, **kwargs):
         text = f"Restore activity: {instance.monitor}\n\nRestore log{instance.console_log}\n\nExit status:{instance.exit_status}"
         for chat_id in TELEGRAM_CHAT_IDS:
-            requests.post(url="https://api.telegram.org/bot{}/{}".format(TELEGRAM_BOT_TOKEN, "sendMessage"), data={"chat_id": chat_id, "text": text})
+            requests.post(
+                url="https://api.telegram.org/bot{}/{}".format(
+                    TELEGRAM_BOT_TOKEN, "sendMessage"
+                ),
+                data={"chat_id": chat_id, "text": text},
+            )
+
 
 signals.post_save.connect(RestoreActivity.check_stat_size, sender=RestoreActivity)
-signals.post_save.connect(RestoreActivity.send_notify_to_telegram_bot, sender=MonitorActivity)
+signals.post_save.connect(
+    RestoreActivity.send_notify_to_telegram_bot, sender=MonitorActivity
+)

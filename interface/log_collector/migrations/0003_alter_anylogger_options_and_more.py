@@ -4,40 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('log_collector', '0002_collectorexception_fn_data'),
+        ("log_collector", "0002_collectorexception_fn_data"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='anylogger',
+            name="anylogger",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='collectorexception',
+            name="collectorexception",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='djangoexception',
+            name="djangoexception",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='djangologger',
+            name="djangologger",
             options={},
         ),
         migrations.AlterModelOptions(
-            name='nginxlogger',
+            name="nginxlogger",
             options={},
         ),
         migrations.AlterField(
-            model_name='djangoexception',
-            name='exc_info',
+            model_name="djangoexception",
+            name="exc_info",
             field=models.CharField(blank=True, max_length=5000, null=True),
         ),
         migrations.AlterField(
-            model_name='djangoexception',
-            name='message',
+            model_name="djangoexception",
+            name="message",
             field=models.CharField(blank=True, max_length=5000, null=True),
         ),
     ]

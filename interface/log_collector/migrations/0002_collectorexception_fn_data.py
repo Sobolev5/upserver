@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('log_collector', '0001_initial'),
+        ("log_collector", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='collectorexception',
-            name='fn_data',
+            model_name="collectorexception",
+            name="fn_data",
             field=models.TextField(blank=True, null=True),
         ),
     ]

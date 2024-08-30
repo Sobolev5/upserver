@@ -1,4 +1,4 @@
-FROM python:3.11.2-buster as base
+FROM python:3.11.4-buster
 LABEL Sobolev Andrey
 ENV PYTHONUNBUFFERED 1
 
@@ -6,7 +6,7 @@ RUN apt-get update &&  apt-get install bash -y && \
     apt-get upgrade -y && \
     apt-get install -y \
     gcc && apt-get install -y \
-    apt-utils libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev libjpeg-dev libfreetype6-dev python-dev libpq-dev python-dev libxml2-dev libxslt-dev postgresql-client git && \
+    apt-utils libcurl4-gnutls-dev libexpat1-dev gettext libz-dev libssl-dev python-dev libpq-dev python-dev postgresql-client git && \
     pip3 install -U pip setuptools && apt-get install python3-dev -y && apt-get install libev-dev -y
 
 RUN echo "alias rm='rm -i'" >> ~/.bashrc && \
@@ -27,11 +27,4 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 COPY . .
 
-FROM base as prod
-CMD uvicorn app:app --host 0.0.0.0 --port 12346
-
-FROM base as dev
 CMD uvicorn app:app --host 0.0.0.0 --port 12346 --reload
-
-FROM base as test
-CMD pytest
